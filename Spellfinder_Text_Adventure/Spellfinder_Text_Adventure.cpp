@@ -2,10 +2,12 @@
 
 #include <iostream>
 #include "String.h"
+#include "Game.h"
 #define usi unsigned short int
 using namespace std;
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    Game* g = new Game();
+    g->Run();
 }
