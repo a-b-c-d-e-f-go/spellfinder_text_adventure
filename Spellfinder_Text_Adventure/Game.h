@@ -2,6 +2,7 @@
 #include <iostream>
 #include "String.h"
 #include "Room.h"
+#include "Entity.h"
 #include "Player.h"
 
 #define usi unsigned short int //Most common int type in this program.
@@ -28,6 +29,7 @@ private:
 		{Room(), Room(), Room(), Room()},
 	};
 	Player* player;
+	vector<Entity> entities = { };
 
 	//Drawing
 	const void Row_Contents(const usi r) const //Draws a row within the map that contains players and such.
@@ -68,7 +70,25 @@ private:
 	//Effects
 	const void Execute(String& input) //Process the player's command.
 	{
-		if (Check_Command(input, String("move"))) //If the command is 'move'.
+		if (Check_Command(input, String("move"))) //move <north/south/east/west>. Moves 1 room in a given direction.
+		{
+			//Do something based on what input is (since it's now only the parameter).
+			cout << "Moving " << input.CStr() << ".\n";
+			
+		}
+		if (Check_Command(input, String("inspect"))) //inspect <item> - Describes a given item if the player has it. Otherwise says that they don't.
+		{
+			//Do something based on what input is (since it's now only the parameter).
+		}
+		if (Check_Command(input, String("spell"))) //spell <spell> - Describes a given spell if the player knows it. Otherwise says that they don't.
+		{
+			//Do something based on what input is (since it's now only the parameter).
+		}
+		if (Check_Command(input, String("use"))) //use <item> - Uses a given item, with an effect from its Use().
+		{
+			//Do something based on what input is (since it's now only the parameter).
+		}
+		if (Check_Command(input, String("cast"))) //cast <known spell> - Casts a given spell, with an effect from the Use().
 		{
 			//Do something based on what input is (since it's now only the parameter).
 		}
@@ -88,12 +108,19 @@ public:
 		}
 		delete_arr(rooms);
 
+		//Delete entities
+		entities.clear();
+		entities.shrink_to_fit();
+
 		//Delete player
 		delete_s(player);
 		player = nullptr;
 	}
 	void Run()
 	{
+		player = new Player(0, 0); //Add player.
+		Entity p_entity = (Entity)(*player); //Convert player to entity.
+		entities.push_back(p_entity); //Add player to entities.
 		Draw_Map();
 		String input;
 		do
