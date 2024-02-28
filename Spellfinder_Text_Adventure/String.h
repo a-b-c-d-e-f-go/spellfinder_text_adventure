@@ -48,7 +48,13 @@ public: //External Functions
     {
         return vstr.size();
     }
-    const char& CharacterAt(size_t _index) const //Returns a char representing the character at the location.
+    char& CharacterAt(size_t _index) //Returns a char representing the character at the location.
+    {
+        out_of_bounds = '\0'; //Reset out of bounds char so it always returns '\0'.
+        if (_index < 0 || _index >= Length()) { return out_of_bounds; } //If index is less than 0 or greater than length, return '\0'.
+        return vstr[_index]; //Return the character at in the char vector.
+    }
+    const char& CharacterAt(size_t _index) const //Const overload.
     {
         out_of_bounds = '\0'; //Reset out of bounds char so it always returns '\0'.
         if (_index < 0 || _index >= Length()) { return out_of_bounds; } //If index is less than 0 or greater than length, return '\0'.
@@ -188,9 +194,13 @@ public: //External Operators
         vstr = _str.vstr; //Set to new string.
         return *this;
     }
-    const char& operator[](size_t _index) const //Returns the character located at position n.
+    char& operator[](size_t _index) //Returns the character located at position n.
     {
-        return CharacterAt(_index); //Individual character.
+        return CharacterAt(_index); //Returns non-const ver.
+    }
+    const char& operator[](size_t _index) const //Const overload.
+    {
+        return CharacterAt(_index); //Returns const ver.
     }
     bool operator<(const String& _str) //Returns true if this string comes before rhs in the alphabet.
     {

@@ -11,17 +11,21 @@ private:
 	String description;
 public:
 	Item* item;
+	String Contents() const
+	{
+		return String("   ");
+	}
 	Room()
 	{
-
 	}
 	Room(String& _desc, Item* _item)
 	{
-
+		
 	}
 	~Room()
 	{
-
+		delete item;
+		item = nullptr;
 	}
 	String Description() const
 	{

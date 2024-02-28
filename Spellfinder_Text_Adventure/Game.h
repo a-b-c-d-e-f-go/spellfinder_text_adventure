@@ -10,24 +10,30 @@
 #define loop(var, min, max) for (usi var = min; var < max; var++)
 #define delete_s(target) if (target != nullptr) { delete target; } //Safe version. Delete target if it exists.
 #define delete_arr(target) if (target != nullptr) { delete[] target; } //Safe version. Delete targeted array if it exists.
+#define cont(x, y) rooms[x][y].Contents().CStr()
 using namespace std;
 
-const usi map_size = 3;
-const char R_CLOSED[] =	"#############   #############   #############"; //Top and bottom of the map.
-const char R_OPEN[] =	"#####   #####   #####   #####   #####   #####"; //Top and bottom of rooms (besides R_CLOSED for the top and bottom of the map).
-const char R_INSIDE[] =	"##         ##   ##         ##   ##         ##"; //Before and after a row of room's contents.
+const usi map_size = 4;
+const char R_CLOSED[] =	"#############   #############   #############   #############"; //Top and bottom of the map.
+const char R_OPEN[] =	"#####   #####   #####   #####   #####   #####   #####   #####"; //Top and bottom of rooms (besides R_CLOSED for the top and bottom of the map).
+const char R_INSIDE[] =	"##         ##   ##         ##   ##         ##   ##         ##"; //Before and after a row of room's contents.
 
 class Game
 {
 private:
-	Room rooms[map_size][map_size];
+	Room rooms[map_size][map_size] = {
+		{Room(), Room(), Room(), Room()},
+		{Room(), Room(), Room(), Room()},
+		{Room(), Room(), Room(), Room()},
+		{Room(), Room(), Room(), Room()},
+	};
 	Player* player;
 
 	//Drawing
 	const void Row_Contents(const usi r) const //Draws a row within the map that contains players and such.
 	{
 		m(R_INSIDE);
-		m("##   " << Cont(0, r) rg Cont(1, r) rg Cont(2, r) << "   ##");
+		m("##   " << cont(0, r) rg cont(1, r) rg cont(2, r) rg cont(3, r) << "   ##");
 		m(R_INSIDE);
 	}
 	const void Draw_Map() const //Draws the entire map.
@@ -42,11 +48,11 @@ private:
 
 		m(R_OPEN); //Row 2
 		Row_Contents(2);
+		m(R_OPEN << endl);
+
+		m(R_OPEN); //Row 3
+		Row_Contents(3);
 		m(R_CLOSED << endl);
-	}
-	const char* Cont(const usi x, const usi y) const //Get 3 characters to place in a room based on its contents.
-	{
-		return "[S]";
 	}
 
 	bool Check_Command(String& input, String command) //If the input starts with this command, return true and set the input to just the parameter of the command.
