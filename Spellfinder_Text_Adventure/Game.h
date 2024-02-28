@@ -22,11 +22,31 @@ const char R_INSIDE[] =	"##         ##   ##         ##   ##         ##   ##     
 class Game
 {
 private:
-	Room rooms[map_size][map_size] = {
-		{Room(), Room(), Room(), Room()},
-		{Room(), Room(), Room(), Room()},
-		{Room(), Room(), Room(), Room()},
-		{Room(), Room(), Room(), Room()},
+	Room rooms[map_size][map_size] = { //Create room array.
+		{
+			Room("You enter what appears to be the room you came from.\nWhere the entrance used to be is now a solid wall."), //0,0: Top left. No items.
+			Room("test"), //0,1: 
+			Room(), //0,2: 
+			Room() //0,3: Bottom left.
+		},
+		{
+			Room(), //1,0: 
+			Room(), //1,1: 
+			Room(), //1,2: 
+			Room() //1,3: 
+		},
+		{
+			Room(), //2,0: 
+			Room(), //2,1: 
+			Room(), //2,2: 
+			Room() //2,3: 
+		},
+		{
+			Room(), //3,0: Top right.
+			Room(), //3,1: 
+			Room(), //3,2: 
+			Room() //3,3: Bottom right.
+		},
 	};
 	Player* player;
 	vector<Entity> entities = { };
@@ -41,11 +61,11 @@ private:
 	}
 	const char* Enem(usi x, usi y) const //Room enemy.
 	{
-		return "Gx3";
+		return "REV";
 	}
 	const char* Cont(usi x, usi y) const //Room contents.
 	{
-		if (player->x == x && player->y == y) { return "Px1"; } //If a player is present, the item will automatically get picked up (hence why they occupy the same space).
+		if (player->x == x && player->y == y) { return "PLA"; } //If a player is present, the item will automatically get picked up (hence why they occupy the same space).
 		if (rooms[x][y].item != nullptr) //If an item is present.
 		{
 			return rooms[x][y].item->Shorthand().CStr(); //Use item for room contents.
@@ -78,16 +98,16 @@ private:
 			input.Replace(command + " ", ""); //Remove command and space, leaving only the parameter. Eg. 'move south' becomes 'south'.
 			return true;
 		}
-		return false;
+		return false; //Return false, checking for the next command.
 	}
 
 	//Effects
-	const void Execute(String& input) //Process the player's command.
+	const void Execute(String& input) //Do things based on the player's command.
 	{
 		if (Check_Command(input, String("move"))) //move <north/south/east/west> - Moves 1 room in a given direction.
 		{
 			//Do something based on what input is (since it's now only the parameter).
-			output = String("Moved 1 room ") + input + String(".");
+			output = String("Moved 1 room ") + input + String(". ") + rooms[player->x][player->y].Description();
 			
 		}
 		else if (Check_Command(input, String("inspect"))) //inspect <item> - Describes a given item if the player has it. Otherwise says that they don't.
@@ -102,7 +122,7 @@ private:
 		{
 			//Do something based on what input is (since it's now only the parameter).
 		}
-		else if (Check_Command(input, String("cast"))) //cast <known spell> - Casts a given spell, with an effect from the Use().
+		else if (Check_Command(input, String("cast"))) //cast <spell> - Casts a given spell, with an effect from the Use().
 		{
 			//Do something based on what input is (since it's now only the parameter).
 		}
@@ -115,9 +135,9 @@ private:
 			cout << "quit - Ends the game.\n\n";
 			cout << "inspect <item> - Describes a given item.\n\n";
 			cout << "spell <spell> - Describes a given spell.\n\n";
-			cout << "move <north/south/east/west> Moves you 1 room in a given direction.\nThis will end your turn, allowing the ghosts to act.\n\n";
-			cout << "use <item> - Uses a given item, which might consume it depending on the item.\nThis will end your turn, allowing the ghosts to act.\nUse 'inspect' for more detail on a specific item's effects.\n\n";
-			cout << "cast <known spell> - Casts a given spell, which typically deals damage.\nThis will end your turn, allowing the ghosts to act.\nUse 'spell' for more detail on a specific spell's effects.\n\n";
+			cout << "move <north/south/east/west> Moves you 1 room in a given direction.\nThis will end your turn, allowing the revenants to act.\n\n";
+			cout << "use <item> - Uses a given item, which might consume it depending on the item.\nThis will end your turn, allowing the revenants to act.\nUse 'inspect' for more detail on a specific item's effects.\n\n";
+			cout << "cast <known spell> - Casts a given spell, which typically deals damage.\nThis will end your turn, allowing the revenants to act.\nUse 'spell' for more detail on a specific spell's effects.\n\n";
 
 			cout << "Press enter to return.\n"; getchar(); //Wait for enter key.
 		}

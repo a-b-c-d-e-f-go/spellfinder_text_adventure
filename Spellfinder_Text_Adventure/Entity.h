@@ -39,8 +39,20 @@ public:
 	}
 };
 
-class Ghost : public Entity
+class Revenant : public Entity
 {
 public:
+	Revenant()
+	{
 
+	}
+	Revenant(usi _x, usi _y)
+	{
+		x = _x;
+		y = _y;
+	}
+	~Revenant()
+	{
+
+	}
 };

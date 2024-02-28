@@ -18,9 +18,15 @@ public:
 	Room()
 	{
 	}
-	Room(String& _desc, Item* _item)
+	Room(String& _desc, Item* _item = nullptr)
 	{
-		
+		description = _desc;
+		item = _item;
+	}
+	Room(const char* _desc, Item* _item = nullptr) //For char arrays.
+	{
+		description = String(_desc); //Convert char array to custom string.
+		item = _item;
 	}
 	~Room()
 	{
@@ -29,6 +35,6 @@ public:
 	}
 	String Description() const
 	{
-
+		return description;
 	}
 };
