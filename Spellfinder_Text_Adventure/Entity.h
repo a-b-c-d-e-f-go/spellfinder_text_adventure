@@ -10,9 +10,37 @@ using namespace std;
 
 class Entity
 {
-private:
-
 public:
 	usi x;
 	usi y;
+};
+
+class Player : public Entity //Different layer, but still uses x and y.
+{
+private:
+	list<String> spells;
+public:
+	Player()
+	{
+
+	}
+	Player(usi _x, usi _y)
+	{
+		x = _x;
+		y = _y;
+	}
+	~Player()
+	{
+
+	}
+	bool FindSpell(String& _spell)
+	{
+
+	}
+};
+
+class Ghost : public Entity
+{
+public:
+
 };
