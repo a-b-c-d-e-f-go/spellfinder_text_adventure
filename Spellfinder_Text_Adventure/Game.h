@@ -7,11 +7,11 @@
 
 #define usi unsigned short int //Most common int type in this program.
 #define m(s) cout << s << endl //Write to map. Used in Run().
-#define rg << "             " << //Gap between contents of each room. Used in Row_Contents().
+#define cg << "             " << //Gap between contents of each room. Used in Row_Contents().
+#define eg << "   ##   ##   " << //Gap between enemies in each room. Used in Row_Contents().
 #define loop(var, min, max) for (usi var = min; var < max; var++)
 #define delete_s(target) if (target != nullptr) { delete target; } //Safe version. Delete target if it exists.
 #define delete_arr(target) if (target != nullptr) { delete[] target; } //Safe version. Delete targeted array if it exists.
-#define cont(x, y) rooms[x][y].Contents().CStr()
 using namespace std;
 
 const usi map_size = 4;
@@ -34,9 +34,22 @@ private:
 	//Drawing
 	const void Row_Contents(const usi r) const //Draws a row within the map that contains players and such.
 	{
+		m("##   " << Enem(0, r) eg Enem(1, r) eg Enem(2, r) eg Enem(3, r) << "   ##");
+		m("##   " << Cont(0, r) cg Cont(1, r) cg Cont(2, r) cg Cont(3, r) << "   ##");
 		m(R_INSIDE);
-		m("##   " << cont(0, r) rg cont(1, r) rg cont(2, r) rg cont(3, r) << "   ##");
-		m(R_INSIDE);
+	}
+	const char* Enem(usi x, usi y) const //Room enemy.
+	{
+		return "Gx3";
+	}
+	const char* Cont(usi x, usi y) const //Room contents.
+	{
+		if (player->x == x && player->y == y) { return "Px1"; } //If a player is present, the item will automatically get picked up (hence why they occupy the same space).
+		if (rooms[x][y].item != nullptr) //If an item is present.
+		{
+			return rooms[x][y].item->Shorthand().CStr(); //Use item for room contents.
+		}
+		return "   "; //If nothing is present.
 	}
 	const void Draw_Map() const //Draws the entire map.
 	{
@@ -120,7 +133,7 @@ public:
 	{
 		player = new Player(0, 0); //Add player.
 		Entity p_entity = (Entity)(*player); //Convert player to entity.
-		entities.push_back(p_entity); //Add player to entities.
+		//entities.push_back(p_entity); //Add player to entities.
 		Draw_Map();
 		String input;
 		do

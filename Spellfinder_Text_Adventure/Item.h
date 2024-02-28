@@ -13,6 +13,10 @@ class Item //Abstract class.
 public:
 	virtual String Description() const;
 	virtual void Use();
+	virtual String Shorthand() const
+	{
+		return String("ITM");
+	}
 };
 
 class Spell : Item //Implementation with variable name/damage.
