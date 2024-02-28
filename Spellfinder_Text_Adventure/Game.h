@@ -8,6 +8,7 @@
 #define loop(var, min, max) for (usi var = min; var < max; var++)
 #define delete_s(target) if (target != nullptr) { delete target; } //Safe version. Delete target if it exists.
 #define delete_arr(target) if (target != nullptr) { delete[] target; } //Safe version. Delete targeted array if it exists.
+#define newrev(x, y) revenants.push_back(Revenant(x, y))
 using namespace std;
 
 #define m(s) cout << s << endl //Write to map. Used in Run().
@@ -49,7 +50,7 @@ private:
 		},
 	};
 	Player* player;
-	vector<Entity> entities = { };
+	vector<Revenant> revenants = { };
 	String output = prompt;
 
 	//Drawing
@@ -61,7 +62,28 @@ private:
 	}
 	const char* Enem(usi x, usi y) const //Room enemy.
 	{
-		return "REV";
+		usi count = 0;
+		loop(i, 0, revenants.size()) //Loop through revenants vector.
+		{
+			if (revenants[i].x == x && revenants[i].y == y) //If the revenant is at this position.
+			{
+				count++; //Increase revenant count.
+			}
+		}
+		switch (count) //Return based on count of revenants in this room. 0 revenants will show nothing.
+		{
+			case 0: return "   ";
+			case 1: return "REV";
+			case 2: return "Rx2";
+			case 3: return "Rx3";
+			case 4: return "Rx4";
+			case 5: return "Rx5";
+			case 6: return "Rx6";
+			case 7: return "Rx7";
+			case 8: return "Rx8";
+			case 9: return "Rx9";
+			default: return "Rx?";
+		}
 	}
 	const char* Cont(usi x, usi y) const //Room contents.
 	{
@@ -157,9 +179,9 @@ public:
 		}
 		delete_arr(rooms);
 
-		//Delete entities
-		entities.clear();
-		entities.shrink_to_fit();
+		//Delete revenants
+		revenants.clear();
+		revenants.shrink_to_fit();
 
 		//Delete player
 		delete_s(player);
@@ -168,8 +190,11 @@ public:
 	void Run()
 	{
 		player = new Player(0, 0); //Add player.
-		Entity p_entity = (Entity)(*player); //Convert player to entity.
-		//entities.push_back(p_entity); //Add player to entities.
+		newrev(3, 3);
+		newrev(3, 3);
+		newrev(3, 3);
+		newrev(3, 3);
+		newrev(2, 3);
 		String input;
 		do
 		{
