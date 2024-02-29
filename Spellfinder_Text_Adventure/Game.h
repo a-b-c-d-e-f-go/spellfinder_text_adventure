@@ -52,13 +52,13 @@ private:
 			//2,1: GARDEN
 			Room("You enter a small garden filled with luminescent flora."),
 			//2,2: EXODIA
-			Room("You enter a room with an obsidian pedestal at its center."),
+			Room("You enter a room with diagonal tiles and an obsidian pedestal at its center."),
 			//2,3: WEST REVENANT EXIT
 			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be operating tables.")
 		},
 		{
-			//3,0: LIBRARY (Top Right)
-			Room("You enter a room with bookshelves covering the northern and eastern walls."),
+			//3,0: INDEX (Top Right)
+			Room("You enter a room with bookshelves adorning the northern and eastern walls."),
 			//3,1: DESK
 			Room("You enter a room furnished with a wooden desk, drawer, and chair.\nPaper notes written in incomprehensible symbols are strewn across the floor."),
 			//3,2: NORTH REVENANT EXIT
@@ -154,20 +154,67 @@ private:
 		}
 	}
 
+	const void Move_Revenant(Revenant& rev, short int _x, short int _y) //Move a revenant and update its position to other revenants.
+	{
+		rev_count[rev.x][rev.y] -= 1; //Decrease revenant count where the revenant moved from.
+		rev.x += _x;
+		rev.y += _y;
+		rev_count[rev.x][rev.y] += 1; //Increase revenant count where the revenant moved to.
+	}
+
 	const void Revenants_Turn() //Happens when you move, cast a spell, or 
 	{
 		if (revenants.size() > 0) //If there are any remaining revenants.
 		{
 			output += String("The revenants take their turn.\n");
-			Update_Revenant_Count(); //Should update after they move.
+
+			loop(i, 0, revenants.size()) //For each revenant that exists.
+			{
+				if (revenants[i].x == player->x && revenants[i].y == player->y) //At player's position. Attempt to attack.
+				{
+
+				}
+				else //Not at player's position. Attempt to close in.
+				{
+					int weight_n = 0; int weight_s = 0; int weight_e = 0; int weight_w = 0; //Weights for different directions.
+
+					//Affect weights based on X/Y difference to player. The further away on an axis, the more it is favoured.
+					weight_n += (revenants[i].y - player->y); weight_s -= (revenants[i].y - player->y);
+					weight_e -= (revenants[i].x - player->x); weight_w += (revenants[i].x - player->x);
+
+					//If the distance to the player is further than 1 room.
+					if (abs(weight_n) > 1 || abs(weight_s) > 1 || abs(weight_e) > 1 || abs(weight_w) > 1)
+					{
+						//Affect weights based on if there are other revenants occupying that direction, encouraging the revenants to spread out when distant from the player.
+						weight_n -= rev_count[revenants[i].x][revenants[i].y - 1] * 2;
+						weight_s -= rev_count[revenants[i].x][revenants[i].y + 1] * 2;
+						weight_e -= rev_count[revenants[i].x + 1][revenants[i].y] * 2;
+						weight_w -= rev_count[revenants[i].x - 1][revenants[i].y] * 2;
+					}
+					//Prevent revenants from pathfinding outside the map.
+					if ((revenants[i].x + 1) >= map_size) { weight_e = -999; } if ((revenants[i].x - 1) < 0) { weight_w = -999; }
+					if ((revenants[i].y + 1) >= map_size) { weight_s = -999; } if ((revenants[i].y - 1) < 0) { weight_n = -999; }
+
+					//Choose a direction to move in based on the highest weight.
+					if (weight_n >= weight_s && weight_n >= weight_e && weight_n >= weight_w) { Move_Revenant(revenants[i], 0, -1); } //If weight_n is at least tied for highest.
+					else if (weight_s >= weight_n && weight_s >= weight_e && weight_s >= weight_w) { Move_Revenant(revenants[i], 0, 1); } //If weight_s is at least tied for highest.
+					else if (weight_e >= weight_n && weight_e >= weight_s && weight_e >= weight_w) { Move_Revenant(revenants[i], 1, 0); } //If weight_e is at least tied for highest.
+					else if (weight_w >= weight_n && weight_w >= weight_s && weight_w >= weight_e) { Move_Revenant(revenants[i], -1, 0); } //If weight_w is at least tied for highest.
+				}
+			}
 		}
+		Update_Revenant_Count(); //Should update after they move.
 	}
 
 	//Effects
 	const void Execute(String& input) //Do things based on the player's command.
 	{
-
-		if (Check_Command(input, String("move"))) //move <north/south/east/west> - Moves 1 room in a given direction.
+		if (Check_Command(input, String("wait"))) //wait - Does nothing, allowing the revenants to take their turn.
+		{
+			output = String("Skipping your turn. ");
+			Revenants_Turn();
+		}
+		else if (Check_Command(input, String("move"))) //move <north/south/east/west> - Moves 1 room in a given direction.
 		{
 			//Initialize variables.
 			short int xv = 0;
@@ -221,11 +268,31 @@ private:
 		}
 		else if (Check_Command(input, String("inspect"))) //inspect <item> - Describes a given item if the player has it. Otherwise says that they don't.
 		{
-			//Do something based on what input is (since it's now only the parameter).
+			Item* inspected = player->FindItem(input);
+			if (inspected == nullptr) //Invalid item.
+			{
+				output = String("You don't have an item called ").Append(input).Append(String(".")); //Error message.
+			}
+			else //Valid item.
+			{
+				output = prompt; //Reset command output.
+				system("cls"); //Clear map to make way for command list.
+				//inspected->Description().WriteToConsole();
+			}
 		}
 		else if (Check_Command(input, String("spell"))) //spell <spell> - Describes a given spell if the player knows it. Otherwise says that they don't.
 		{
-			//Do something based on what input is (since it's now only the parameter).
+			Spell* inspected = player->FindSpell(input);
+			if (inspected == nullptr) //Invalid item.
+			{
+				output = String("You don't know a spell called ").Append(input).Append(String(".")); //Error message.
+			}
+			else //Valid spell.
+			{
+				output = prompt; //Reset command output.
+				system("cls"); //Clear map to make way for command list.
+				//inspected->Description().WriteToConsole();
+			}
 		}
 		else if (Check_Command(input, String("use"))) //use <item> - Uses a given item, with an effect from its Use().
 		{
@@ -244,6 +311,7 @@ private:
 			cout << "quit - Ends the game.\n\n";
 			cout << "inspect <item> - Describes a given item.\n\n";
 			cout << "spell <spell> - Describes a given spell.\n\n";
+			cout << "wait - Does nothing and ends your turn, allowing the revenants to act.\n\n";
 			cout << "move <north/south/east/west> Moves you 1 room in a given direction.\nThis will end your turn, allowing the revenants to act.\n\n";
 			cout << "use <item> - Uses a given item, which might consume it depending on the item.\nThis will end your turn, allowing the revenants to act.\nUse 'inspect' for more detail on a specific item's effects.\n\n";
 			cout << "cast <known spell> - Casts a given spell, which typically deals damage.\nThis will end your turn, allowing the revenants to act.\nUse 'spell' for more detail on a specific spell's effects.\n\n";
@@ -261,11 +329,17 @@ public:
 	{
 		player = new Player(0, 0); //Add player.
 		//Add revenants.
-		newrev(3, 3);
-		newrev(3, 3);
-		newrev(3, 3);
-		newrev(2, 3);
-		newrev(3, 2);
+		loop(i, 0, 3)
+		{
+			newrev(3, 3);
+		}
+		/*loop(i, 0, 4) Death
+		{
+			loop(j, 0, 4)
+			{
+				newrev(i, j);
+			}
+		}*/
 	}
 	~Game()
 	{

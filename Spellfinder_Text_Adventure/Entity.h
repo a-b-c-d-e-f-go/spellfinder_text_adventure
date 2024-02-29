@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "String.h"
 #define usi unsigned short int
+#define loop(var, min, max) for (usi var = min; var < max; var++)
 #define delete_s(target) if (target != nullptr) { delete target; } //Safe version. Delete target if it exists.
 #define delete_arr(target) if (target != nullptr) { delete[] target; } //Safe version. Delete targeted array if it exists.
 using namespace std;
@@ -35,9 +36,13 @@ public:
 	{
 
 	}
-	bool FindSpell(String& _spell)
+	Item* FindItem(String& _item)
 	{
-
+		return nullptr;
+	}
+	Spell* FindSpell(String& _spell)
+	{
+		return nullptr;
 	}
 };
 
