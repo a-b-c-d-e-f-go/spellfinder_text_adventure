@@ -11,9 +11,10 @@ using namespace std;
 class Item //Abstract class.
 {
 public:
-	virtual String Description() const;
-	virtual void Use();
-	virtual String Shorthand() const
+	virtual String Description() const; //When inspected.
+	virtual String RoomDescription() const; //When found in a room.
+	virtual void Use(); //When used.
+	virtual String Shorthand() const //When drawing the map.
 	{
 		return String("ITM");
 	}
@@ -31,7 +32,11 @@ class Spell : Item //Implementation with variable name/damage.
 	{
 
 	}
-	String Description() const
+	String Description() const //When inspected.
+	{
+
+	}
+	String RoomDescription() const //When found in a room.
 	{
 
 	}

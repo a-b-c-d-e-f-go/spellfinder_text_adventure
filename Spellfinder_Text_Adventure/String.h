@@ -210,7 +210,7 @@ public: //External Operators
     {
         return (strcmp(CStr(), _str.CStr()) > 0); //strcmp is alphabetically after.
     }
-    String operator+(const String& _str) //Return a new string that combines the lhs and rhs.
+    String operator+(const String& _str) const //Return a new string that combines the lhs and rhs.
     {
         String* s = new String(*this); //Copy this string.
         s->Append(_str); //Append the second string to the copy.

@@ -35,6 +35,11 @@ public:
 	}
 	String Description() const
 	{
+		if (item != nullptr)
+		{
+			String s = description;
+			return s.Append("\n").Append(item->RoomDescription());
+		}
 		return description;
 	}
 };

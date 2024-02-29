@@ -25,29 +25,35 @@ class Game
 private:
 	Room rooms[map_size][map_size] = { //Create room array.
 		{
-			Room("You enter what appears to be the room you came from.\nWhere the entrance used to be is now a solid wall."), //0,0: Top left. No items.
-			Room("test"), //0,1: 
-			Room(), //0,2: 
-			Room() //0,3: Bottom left.
+			Room("You enter what appears to be the room you came from.\nWhere the entrance used to be is now a solid wall."), //0,0: Top left (START).
+			Room("DESC"), //0,1: 
+			Room("DESC"), //0,2: 
+			Room("DESC") //0,3: Bottom left.
 		},
 		{
-			Room(), //1,0: 
-			Room(), //1,1: 
-			Room(), //1,2: 
-			Room() //1,3: 
+			Room("DESC"), //1,0: 
+			Room("You enter a room with 4 stone pillars at each corner."), //1,1: 
+			Room("You enter a room with moss-covered walls."), //1,2: 
+			Room("") //1,3: 
 		},
 		{
-			Room(), //2,0: 
-			Room(), //2,1: 
-			Room(), //2,2: 
-			Room() //2,3: 
+			Room("DESC"), //2,0: 
+			Room("DESC"), //2,1: 
+			Room("DESC"), //2,2: 
+			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be operating tables.") //2,3: Endgame room.
 		},
 		{
-			Room(), //3,0: Top right.
-			Room(), //3,1: 
-			Room(), //3,2: 
-			Room() //3,3: Bottom right.
+			Room("You enter a room with bookshelves covering the northern and eastern walls."), //3,0: Top right.
+			Room("You enter a room furnished with a wooden desk, drawer, and chair.\nPaper notes written in incomprehensible symbols are strewn across the floor."), //3,1: 
+			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be lockers on the eastern wall."), //3,2: Endgame room.
+			Room("The fog dissapates as you enter what can only be described as a bottomless pit.") //3,3: Bottom right (END).
 		},
+	};
+	usi rev_count[map_size][map_size] = { //For the purposes of revenant AI and the map display.
+		{0, 0, 0, 0},
+		{0, 0, 0, 0},
+		{0, 0, 0, 0},
+		{0, 0, 0, 0}
 	};
 	Player* player;
 	vector<Revenant> revenants = { };
@@ -62,15 +68,7 @@ private:
 	}
 	const char* Enem(usi x, usi y) const //Room enemy.
 	{
-		usi count = 0;
-		loop(i, 0, revenants.size()) //Loop through revenants vector.
-		{
-			if (revenants[i].x == x && revenants[i].y == y) //If the revenant is at this position.
-			{
-				count++; //Increase revenant count.
-			}
-		}
-		switch (count) //Return based on count of revenants in this room. 0 revenants will show nothing.
+		switch (rev_count[x][y]) //Return based on count of revenants in this room. 0 revenants will show nothing.
 		{
 			case 0: return "   ";
 			case 1: return "REV";
@@ -82,7 +80,7 @@ private:
 			case 7: return "Rx7";
 			case 8: return "Rx8";
 			case 9: return "Rx9";
-			default: return "Rx?";
+			default: return "Rx?"; //For more than 9 revenants in one spot.
 		}
 	}
 	const char* Cont(usi x, usi y) const //Room contents.
@@ -113,6 +111,7 @@ private:
 		m(R_CLOSED << endl);
 	}
 
+
 	bool Check_Command(String& input, String command) //If the input starts with this command, return true and set the input to just the parameter of the command.
 	{
 		if (input.Find(command) == 0) //Checks for a command.
@@ -122,15 +121,76 @@ private:
 		}
 		return false; //Return false, checking for the next command.
 	}
+	const void Update_Revenant_Count()
+	{
+		loop(i, 0, map_size) //Loop through rev_count and reset it.
+		{
+			loop(j, 0, map_size)
+			{
+				rev_count[i][j] = 0;
+			}
+		}
+		loop(i, 0, revenants.size()) //Loop through revenants vector.
+		{
+			rev_count[revenants[i].x][revenants[i].y]++; //Increase counter at its coordinates.
+		}
+	}
+
+	const void Revenants_Turn() //Happens when you move, cast a spell, or 
+	{
+		if (revenants.size() > 0) //If there are any remaining revenants.
+		{
+			output += String("The revenants take their turn.\n");
+			Update_Revenant_Count(); //Should update after they move.
+		}
+	}
 
 	//Effects
 	const void Execute(String& input) //Do things based on the player's command.
 	{
+
 		if (Check_Command(input, String("move"))) //move <north/south/east/west> - Moves 1 room in a given direction.
 		{
-			//Do something based on what input is (since it's now only the parameter).
-			output = String("Moved 1 room ") + input + String(". ") + rooms[player->x][player->y].Description();
-			
+			//Initialize variables.
+			short int xv = 0;
+			short int yv = 0;
+			bool valid = true;
+			//X and Y modifier based on direction.
+			if (input == String("north")) { yv = -1; }
+			if (input == String("south")) { yv = 1; }
+			if (input == String("west")) { xv = -1; }
+			if (input == String("east")) { xv = 1; }
+			if ((player->x + xv) >= map_size || (player->x + xv) < 0) { valid = false; } //Outside map x bounds.
+			if ((player->y + yv) >= map_size || (player->y + yv) < 0) { valid = false; } //Outside map y bounds.
+
+			if (valid)
+			{
+				player->x += xv; player->y += yv; //Move player.
+				output = String("Moved 1 room ") + input + String(". "); //Announce new room the player has entered.
+
+				Revenants_Turn(); //This should happen before revenant count for best results.
+				output += rooms[player->x][player->y].Description(); //Describe room after letting revenants take their turn.
+
+				usi revs = rev_count[player->x][player->y]; //Revenants in the room with the player.
+				if (revs > 1) //If there are revenants in the room, announce this too.
+				{
+					output.Append(String("\nThere are "));
+					output.Append(String(to_string(revs)));
+					output.Append(String(" revenants in the room with you."));
+				}
+				else if (revs == 1) //Different version for 1 revenant.
+				{
+					output.Append(String("\nThere is a revenant in the room with you."));
+				}
+				else if (revs <= 0) //Specific room descriptions that only happen with no revenants.
+				{
+
+				}
+			}
+			else //Do not let revenants act here. It'd be pretty frustrating if you gave them a free turn for forgetting there's a wall in the way.
+			{
+				output = String("Cannot move ") + input + String(" as it there is a solid wall in the way.");
+			}
 		}
 		else if (Check_Command(input, String("inspect"))) //inspect <item> - Describes a given item if the player has it. Otherwise says that they don't.
 		{
@@ -148,7 +208,7 @@ private:
 		{
 			//Do something based on what input is (since it's now only the parameter).
 		}
-		else if (Check_Command(input, String("help")))
+		else if (Check_Command(input, String("help"))) //help - Lists all commands.
 		{
 			output = prompt; //Reset command output.
 			system("cls"); //Clear map to make way for command list.
@@ -163,6 +223,10 @@ private:
 
 			cout << "Press enter to return.\n"; getchar(); //Wait for enter key.
 		}
+		else
+		{
+			output = String("Command does not exist. Enter 'help' to see a list of commands.");
+		}
 	}
 	
 public:
@@ -172,18 +236,18 @@ public:
 	}
 	~Game()
 	{
-		//Delete rooms
+		//Delete rooms.
 		loop(i, 0, map_size)
 		{
 			delete_arr(rooms[i]);
 		}
 		delete_arr(rooms);
 
-		//Delete revenants
+		//Delete revenants.
 		revenants.clear();
 		revenants.shrink_to_fit();
 
-		//Delete player
+		//Delete player.
 		delete_s(player);
 		player = nullptr;
 	}
@@ -193,11 +257,12 @@ public:
 		newrev(3, 3);
 		newrev(3, 3);
 		newrev(3, 3);
-		newrev(3, 3);
 		newrev(2, 3);
+		newrev(3, 2);
 		String input;
 		do
 		{
+			Update_Revenant_Count(); //Do this before drawing the map.
 			system("cls"); Draw_Map(); output.WriteToConsole(); cout << endl; //Refresh every turn.
 			input = String::ReadFromConsole(); //Waits for input from console.
 			input.ToLower(); //Case insensitive.
