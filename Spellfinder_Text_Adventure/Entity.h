@@ -36,13 +36,20 @@ public:
 	{
 
 	}
-	Item* FindItem(String& _item)
+	Item* FindItem(String& _item) //Finds an Item using binary search.
 	{
 		return nullptr;
 	}
-	Spell* FindSpell(String& _spell)
+	Spell* FindSpell(String& _spell) //Finds a Spell using binary search.
 	{
 		return nullptr;
+	}
+	String Inventory() //Returns a complete list of items and spells.
+	{
+		/*for (auto const& i : items) {
+			std::cout << i.name;
+		}*/
+		return String("ITEMS:\nLamp\nBox\nCat\n\nSPELLS:\nEruption\nBlizzard\nPetrify");
 	}
 };
 

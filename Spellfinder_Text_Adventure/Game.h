@@ -302,6 +302,13 @@ private:
 		{
 			//Do something based on what input is (since it's now only the parameter).
 		}
+		else if (Check_Command(input, String("inventory"))) //cast <spell> - Casts a given spell, with an effect from the Use().
+		{
+			output = prompt; //Reset command output.
+			system("cls"); //Clear map to make way for command list.
+			player->Inventory().WriteToConsole(); //List inventory.
+			cout << "Press enter to return.\n"; getchar(); //Wait for enter key.
+		}
 		else if (Check_Command(input, String("help"))) //help - Lists all commands.
 		{
 			output = prompt; //Reset command output.
@@ -311,6 +318,7 @@ private:
 			cout << "quit - Ends the game.\n\n";
 			cout << "inspect <item> - Describes a given item.\n\n";
 			cout << "spell <spell> - Describes a given spell.\n\n";
+			cout << "inventory - Lists all items and spells you have.\n\n";
 			cout << "wait - Does nothing and ends your turn, allowing the revenants to act.\n\n";
 			cout << "move <north/south/east/west> Moves you 1 room in a given direction.\nThis will end your turn, allowing the revenants to act.\n\n";
 			cout << "use <item> - Uses a given item, which might consume it depending on the item.\nThis will end your turn, allowing the revenants to act.\nUse 'inspect' for more detail on a specific item's effects.\n\n";
