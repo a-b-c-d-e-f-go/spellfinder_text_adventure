@@ -8,45 +8,63 @@
 #define loop(var, min, max) for (usi var = min; var < max; var++)
 #define delete_s(target) if (target != nullptr) { delete target; } //Safe version. Delete target if it exists.
 #define delete_arr(target) if (target != nullptr) { delete[] target; } //Safe version. Delete targeted array if it exists.
-#define newrev(x, y) revenants.push_back(Revenant(x, y))
 using namespace std;
 
 #define m(s) cout << s << endl //Write to map. Used in Run().
 #define cg << "             " << //Gap between contents of each room. Used in Row_Contents().
 #define eg << "   ##   ##   " << //Gap between enemies in each room. Used in Row_Contents().
 #define prompt String("Enter a command to proceed. 'help' will list all commands.") //Default output before a command is entered.
+#define pos_desc(_x, _y, _string) if (player->x == _x && player->y == _y) {output += String(_string); }
 const usi map_size = 4;
 const char R_CLOSED[] =	"#############   #############   #############   #############"; //Top and bottom of the map.
 const char R_OPEN[] =	"#####   #####   #####   #####   #####   #####   #####   #####"; //Top and bottom of rooms (besides R_CLOSED for the top and bottom of the map).
 const char R_INSIDE[] =	"##         ##   ##         ##   ##         ##   ##         ##"; //Before and after a row of room's contents.
+
+#define newrev(x, y) revenants.push_back(Revenant(x, y)) //Spawns in a revenant at the given coordinates.
 
 class Game
 {
 private:
 	Room rooms[map_size][map_size] = { //Create room array.
 		{
-			Room("You enter what appears to be the room you came from.\nWhere the entrance used to be is now a solid wall."), //0,0: Top left (START).
-			Room("DESC"), //0,1: 
-			Room("DESC"), //0,2: 
-			Room("DESC") //0,3: Bottom left.
+			//0,0: ENTRANCE (Top Left)
+			Room("You enter what appears to be the room you came from.\nWhere the entrance used to be is now a solid wall."),
+			//0,1: 
+			Room("DESC"),
+			//0,2: 
+			Room("DESC"),
+			//0,3: (Bottom Left)
+			Room("You enter a room with cracked walls and a hole in the south east corner.")
 		},
 		{
-			Room("DESC"), //1,0: 
-			Room("You enter a room with 4 stone pillars at each corner."), //1,1: 
-			Room("You enter a room with moss-covered walls."), //1,2: 
-			Room("") //1,3: 
+			//1,0: 
+			Room("You enter a room with a line of armored statues holding spears on the north side."),
+			//1,1: SPELLBOOK
+			Room("You enter a room with 4 stone pillars at each corner."),
+			//1,2: MOSS
+			Room("You enter a room with moss-covered walls."),
+			//1,3: PASTA
+			Room("You enter room with no distinguishing features.")
 		},
 		{
-			Room("DESC"), //2,0: 
-			Room("DESC"), //2,1: 
-			Room("DESC"), //2,2: 
-			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be operating tables.") //2,3: Endgame room.
+			//2,0: PORTAL
+			Room("You enter a room with an empty staircase leading north up towards an empty tungsten frame about the size of a doorway."),
+			//2,1: GARDEN
+			Room("You enter a small garden filled with luminescent flora."),
+			//2,2: EXODIA
+			Room("You enter a room with an obsidian pedestal at its center."),
+			//2,3: WEST REVENANT EXIT
+			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be operating tables.")
 		},
 		{
-			Room("You enter a room with bookshelves covering the northern and eastern walls."), //3,0: Top right.
-			Room("You enter a room furnished with a wooden desk, drawer, and chair.\nPaper notes written in incomprehensible symbols are strewn across the floor."), //3,1: 
-			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be lockers on the eastern wall."), //3,2: Endgame room.
-			Room("The fog dissapates as you enter what can only be described as a bottomless pit.") //3,3: Bottom right (END).
+			//3,0: LIBRARY (Top Right)
+			Room("You enter a room with bookshelves covering the northern and eastern walls."),
+			//3,1: DESK
+			Room("You enter a room furnished with a wooden desk, drawer, and chair.\nPaper notes written in incomprehensible symbols are strewn across the floor."),
+			//3,2: NORTH REVENANT EXIT
+			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be lockers on the eastern wall."),
+			//3,3: BOTTOMLESS PIT (Bottom Right)
+			Room("The fog dissapates as you enter what can only be described as a bottomless pit.")
 		},
 	};
 	usi rev_count[map_size][map_size] = { //For the purposes of revenant AI and the map display.
@@ -112,7 +130,7 @@ private:
 	}
 
 
-	bool Check_Command(String& input, String command) //If the input starts with this command, return true and set the input to just the parameter of the command.
+	bool Check_Command(String& input, const String command) //If the input starts with this command, return true and set the input to just the parameter of the command.
 	{
 		if (input.Find(command) == 0) //Checks for a command.
 		{
@@ -157,9 +175,14 @@ private:
 			bool valid = true;
 			//X and Y modifier based on direction.
 			if (input == String("north")) { yv = -1; }
-			if (input == String("south")) { yv = 1; }
-			if (input == String("west")) { xv = -1; }
-			if (input == String("east")) { xv = 1; }
+			else if (input == String("south")) { yv = 1; }
+			else if (input == String("west")) { xv = -1; }
+			else if (input == String("east")) { xv = 1; }
+			else //If no cardinal direction is input.
+			{
+				output = String("Cannot move in direction ").Append(input).Append(String(". Please use north, south, east, or west.")); //Error message.
+				return; //Don't perform move command if it is not one of the cardinal directions.
+			}
 			if ((player->x + xv) >= map_size || (player->x + xv) < 0) { valid = false; } //Outside map x bounds.
 			if ((player->y + yv) >= map_size || (player->y + yv) < 0) { valid = false; } //Outside map y bounds.
 
@@ -174,17 +197,21 @@ private:
 				usi revs = rev_count[player->x][player->y]; //Revenants in the room with the player.
 				if (revs > 1) //If there are revenants in the room, announce this too.
 				{
-					output.Append(String("\nThere are "));
-					output.Append(String(to_string(revs)));
-					output.Append(String(" revenants in the room with you."));
+					output += String("\nThere are ");
+					output += String(to_string(revs));
+					output += String(" revenants in the room with you.");
 				}
 				else if (revs == 1) //Different version for 1 revenant.
 				{
-					output.Append(String("\nThere is a revenant in the room with you."));
+					output += String("\nThere is a revenant in the room with you.");
 				}
-				else if (revs <= 0) //Specific room descriptions that only happen with no revenants.
+				else //Specific lines that only happen with no revenants.
 				{
-
+					pos_desc(0, 3, "\nThrough it, you can see a deep cavern. Wouldn't want to fall down there.");
+					pos_desc(1, 3, "\nYou shouldn't linger here.");
+					pos_desc(2, 1, "\nIt doesn't seem to have been kempt in a while.");
+					pos_desc(2, 3, "\nOne of the tables shudders for a moment, but there's nobody on it.");
+					pos_desc(3, 2, "\nSomething is watching you.");
 				}
 			}
 			else //Do not let revenants act here. It'd be pretty frustrating if you gave them a free turn for forgetting there's a wall in the way.
@@ -232,7 +259,13 @@ private:
 public:
 	Game()
 	{
-
+		player = new Player(0, 0); //Add player.
+		//Add revenants.
+		newrev(3, 3);
+		newrev(3, 3);
+		newrev(3, 3);
+		newrev(2, 3);
+		newrev(3, 2);
 	}
 	~Game()
 	{
@@ -253,12 +286,6 @@ public:
 	}
 	void Run()
 	{
-		player = new Player(0, 0); //Add player.
-		newrev(3, 3);
-		newrev(3, 3);
-		newrev(3, 3);
-		newrev(2, 3);
-		newrev(3, 2);
 		String input;
 		do
 		{

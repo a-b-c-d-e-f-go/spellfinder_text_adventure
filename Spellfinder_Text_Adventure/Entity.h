@@ -13,12 +13,14 @@ class Entity
 public:
 	usi x;
 	usi y;
+	usi health;
 };
 
 class Player : public Entity //Different layer, but still uses x and y.
 {
 private:
-	list<String> spells;
+	list<Spell> spells;
+	list<Item> items;
 public:
 	Player()
 	{
