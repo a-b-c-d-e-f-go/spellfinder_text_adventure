@@ -3,10 +3,12 @@
 #include <list>
 #include "Entity.h"
 #include "String.h"
+
 #define usi unsigned short int
 #define loop(var, min, max) for (usi var = min; var < max; var++)
 #define delete_s(target) if (target != nullptr) { delete target; } //Safe version. Delete target if it exists.
 #define delete_arr(target) if (target != nullptr) { delete[] target; } //Safe version. Delete targeted array if it exists.
+
 using namespace std;
 
 class Entity
@@ -60,6 +62,11 @@ public:
 			delete items.back();
 			items.pop_back();
 		}
+		while (!spells.empty()) //Continuously delete and remove spell pointers until empty.
+		{
+			delete spells.back();
+			spells.pop_back();
+		}
 	}
 	Item* FindItem(String& _item) //Finds an Item using binary search.
 	{
@@ -88,10 +95,13 @@ public:
 	{
 		items.push_back(_item);
 		//Sort the list after adding this new item. Items must be in alphabetical order for binary search.
-		/*sort(items.begin(), items.end(),
-		[](const Item& a, const Item& b) {
-			return a < b;
-		});*/
+		//items.sort(Item::Compare);
+	}
+	void AddSpell(Spell* _spell)
+	{
+		spells.push_back(_spell);
+		//Sort the list after adding this new item. Spells must be in alphabetical order for binary search.
+		
 	}
 };
 

@@ -4,6 +4,7 @@
 #include "Room.h"
 #include "Entity.h"
 
+#define ef else if
 #define usi unsigned short int //Most common int type in this program.
 #define loop(var, min, max) for (usi var = min; var < max; var++)
 #define delete_s(target) if (target != nullptr) { delete target; } //Safe version. Delete target if it exists.
@@ -21,7 +22,6 @@ const char R_OPEN[] =	"#####   #####   #####   #####   #####   #####   #####   #
 const char R_INSIDE[] =	"##         ##   ##         ##   ##         ##   ##         ##"; //Before and after a row of room's contents.
 
 #define newrev(x, y) revenants.push_back(Revenant(x, y)) //Spawns in a revenant at the given coordinates.
-#define wait_for_enter cout << "Press enter to return.\n"; getchar() //Wait for enter key.
 #define inspect_valid_item output = prompt; system("cls"); input.ToUpper().WriteToConsole(); cout << "\n---------------\n"; inspected->Description().WriteToConsole(); //Clear console and write item details to console.
 
 #
@@ -29,12 +29,16 @@ const char R_INSIDE[] =	"##         ##   ##         ##   ##         ##   ##     
 class Game
 {
 private:
+	const void wait_for_enter() const
+	{
+		cout << "Press enter to return.\n"; getchar(); //Wait for enter key.
+	}
 	Room rooms[map_size][map_size] = { //Create room array.
 		{
 			//0,0: ENTRANCE (Top Left)
 			Room("You enter what appears to be the room you came from.\nWhere the entrance used to be is now a solid wall."),
-			//0,1: 
-			Room("DESC"),
+			//0,1: DISCHARGE
+			Room("You enter a room with a scorched floor covered in burnt scrolls.", new Scroll(new Spell(String("discharge"), String("Creates an explosion at your position, damaging everything nearby and (to a lesser extent) yourself."), 10, 4))),
 			//0,2: 
 			Room("DESC"),
 			//0,3: (Bottom Left)
@@ -201,9 +205,9 @@ private:
 
 					//Choose a direction to move in based on the highest weight.
 					if (weight_n >= weight_s && weight_n >= weight_e && weight_n >= weight_w) { Move_Revenant(revenants[i], 0, -1); } //If weight_n is at least tied for highest.
-					else if (weight_s >= weight_n && weight_s >= weight_e && weight_s >= weight_w) { Move_Revenant(revenants[i], 0, 1); } //If weight_s is at least tied for highest.
-					else if (weight_e >= weight_n && weight_e >= weight_s && weight_e >= weight_w) { Move_Revenant(revenants[i], 1, 0); } //If weight_e is at least tied for highest.
-					else if (weight_w >= weight_n && weight_w >= weight_s && weight_w >= weight_e) { Move_Revenant(revenants[i], -1, 0); } //If weight_w is at least tied for highest.
+					ef (weight_s >= weight_n && weight_s >= weight_e && weight_s >= weight_w) { Move_Revenant(revenants[i], 0, 1); } //If weight_s is at least tied for highest.
+					ef (weight_e >= weight_n && weight_e >= weight_s && weight_e >= weight_w) { Move_Revenant(revenants[i], 1, 0); } //If weight_e is at least tied for highest.
+					ef (weight_w >= weight_n && weight_w >= weight_s && weight_w >= weight_e) { Move_Revenant(revenants[i], -1, 0); } //If weight_w is at least tied for highest.
 				}
 			}
 		}
@@ -214,6 +218,7 @@ private:
 	{
 		if ((rev_count[player->x][player->y] <= 0) && (rooms[player->x][player->y].item != nullptr)) //If the room is clear and contains an item.
 		{
+			output += String("\n");
 			output += rooms[player->x][player->y].item->RoomDescription(); //Announce item pickup.
 			player->AddItem(rooms[player->x][player->y].item); //Give the item to the player.
 			rooms[player->x][player->y].item = nullptr; //Remove item from room.
@@ -229,7 +234,7 @@ private:
 			Revenants_Turn();
 			ItemCheck();
 		}
-		else if (Check_Command(input, String("move"))) //move <north/south/east/west> - Moves 1 room in a given direction.
+		ef (Check_Command(input, String("move"))) //move <north/south/east/west> - Moves 1 room in a given direction.
 		{
 			//Initialize variables.
 			short int xv = 0;
@@ -237,9 +242,9 @@ private:
 			bool valid = true;
 			//X and Y modifier based on direction.
 			if (input == String("north")) { yv = -1; }
-			else if (input == String("south")) { yv = 1; }
-			else if (input == String("west")) { xv = -1; }
-			else if (input == String("east")) { xv = 1; }
+			ef (input == String("south")) { yv = 1; }
+			ef (input == String("west")) { xv = -1; }
+			ef (input == String("east")) { xv = 1; }
 			else //If no cardinal direction is input.
 			{
 				output = String("Cannot move in direction ").Append(input).Append(String(". Please use north, south, east, or west.")); //Error message.
@@ -263,19 +268,19 @@ private:
 					output += String(to_string(revs));
 					output += String(" revenants in the room with you.");
 				}
-				else if (revs == 1) //Different version for 1 revenant.
+				ef (revs == 1) //Different version for 1 revenant.
 				{
 					output += String("\nThere is a revenant in the room with you.");
 				}
 				else //Items and certain flavor text can only be accessed when there are no revenants in a room.
 				{
 					//Specific lines that only happen with no revenants.
-					pos_desc(0, 3, "\nThrough it, you can see a deep cavern. Wouldn't want to fall down there.\n");
-					pos_desc(1, 0, "\nOne of the statues has almost crumbled completely.\n");
-					pos_desc(1, 3, "\nYou shouldn't linger here.\n");
-					pos_desc(2, 1, "\nIt doesn't seem to have been kempt in a while.\n");
-					pos_desc(2, 3, "\nOne of the tables shudders for a moment, but there's nobody on it.\n");
-					pos_desc(3, 2, "\nSomething is watching you.\n");
+					pos_desc(0, 3, "\nThrough it, you can see a deep cavern. Wouldn't want to fall down there.");
+					pos_desc(1, 0, "\nOne of the statues has almost crumbled completely.");
+					pos_desc(1, 3, "\nYou shouldn't linger here.");
+					pos_desc(2, 1, "\nIt doesn't seem to have been kempt in a while.");
+					pos_desc(2, 3, "\nOne of the tables shudders for a moment, but there's nobody on it.");
+					pos_desc(3, 2, "\nSomething is watching you.");
 					//Items are found after these lines.
 					ItemCheck();
 				}
@@ -285,7 +290,7 @@ private:
 				output = String("Cannot move ") + input + String(" as it there is a solid wall in the way.");
 			}
 		}
-		else if (Check_Command(input, String("inspect"))) //inspect <item> - Describes a given item if the player has it. Otherwise says that they don't.
+		ef (Check_Command(input, String("inspect"))) //inspect <item> - Describes a given item if the player has it. Otherwise says that they don't.
 		{
 			Item* inspected = player->FindItem(input);
 			if (inspected == nullptr) //Invalid item.
@@ -298,10 +303,10 @@ private:
 				//Write if the item is consumable or not in its description.
 				if (inspected->Consumable()) { cout << "Item is consumed on use.\n\n"; }
 				else { cout << "Item is not consumed on use.\n\n"; }
-				wait_for_enter;
+				wait_for_enter();
 			}
 		}
-		else if (Check_Command(input, String("spell"))) //spell <spell> - Describes a given spell if the player knows it. Otherwise says that they don't.
+		ef (Check_Command(input, String("spell"))) //spell <spell> - Describes a given spell if the player knows it. Otherwise says that they don't.
 		{
 			Spell* inspected = player->FindSpell(input);
 			if (inspected == nullptr) //Invalid spell.
@@ -311,25 +316,25 @@ private:
 			else //Valid spell.
 			{
 				inspect_valid_item;
-				wait_for_enter;
+				wait_for_enter();
 			}
 		}
-		else if (Check_Command(input, String("use"))) //use <item> - Uses a given item, with an effect from its Use().
+		ef (Check_Command(input, String("use"))) //use <item> - Uses a given item, with an effect from its Use().
 		{
 			//Do something based on what input is (since it's now only the parameter).
 		}
-		else if (Check_Command(input, String("cast"))) //cast <spell> - Casts a given spell, with an effect from the Use().
+		ef (Check_Command(input, String("cast"))) //cast <spell> - Casts a given spell, with an effect from the Use().
 		{
 			//Do something based on what input is (since it's now only the parameter).
 		}
-		else if (Check_Command(input, String("inventory"))) //cast <spell> - Casts a given spell, with an effect from the Use().
+		ef (Check_Command(input, String("inventory"))) //cast <spell> - Casts a given spell, with an effect from the Use().
 		{
 			output = prompt; //Reset command output.
 			system("cls"); //Clear map to make way for command list.
 			player->Inventory().WriteToConsole(); //List inventory.
-			wait_for_enter;
+			wait_for_enter();
 		}
-		else if (Check_Command(input, String("help"))) //help - Lists all commands.
+		ef (Check_Command(input, String("help"))) //help - Lists all commands.
 		{
 			output = prompt; //Reset command output.
 			system("cls"); //Clear map to make way for command list.
@@ -343,7 +348,7 @@ private:
 			cout << "move <north/south/east/west> Moves you 1 room in a given direction.\nThis will end your turn, allowing the revenants to act.\n\n";
 			cout << "use <item> - Uses a given item, which might consume it depending on the item.\nThis will end your turn, allowing the revenants to act.\nUse 'inspect' for more detail on a specific item's effects.\n\n";
 			cout << "cast <known spell> - Casts a given spell, which typically deals damage.\nThis will end your turn, allowing the revenants to act.\nUse 'spell' for more detail on a specific spell's effects.\n\n";
-			wait_for_enter;
+			wait_for_enter();
 		}
 		else
 		{
@@ -355,6 +360,7 @@ public:
 	Game()
 	{
 		player = new Player(0, 0); //Add player.
+		player->AddSpell(new Spell(String("spark"), String("Shoots out a short-ranged spark of energy."), 5, 0)); //Starter attack.
 		//Add revenants.
 		loop(i, 0, 3)
 		{

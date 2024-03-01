@@ -11,7 +11,11 @@ using namespace std;
 class Item //Abstract class.
 {
 public:
-	virtual bool Consumable() { return false; }
+	bool Compare(const Item* a, const Item* b)
+	{
+		return (a->Name() < b->Name());
+	}
+	virtual bool Consumable() const { return false; } //Consumed on use?
 	virtual String Name() const //For sorting & finding.
 	{
 		return String("ERROR");
@@ -32,8 +36,8 @@ public:
 	{
 		return String("ITM");
 	}
+	
 };
-
 class Spear : public Item
 {
 public:
@@ -49,7 +53,45 @@ public:
 	{
 		return String("The crumbled statue's spear is lying on the ground. Obtained the SPEAR.");
 	}
+	void Use() override //When used.
+	{
+
+	}
+	Spear()
+	{
+
+	}
 };
+class Bomb : public Item
+{
+public:
+	bool Consumable() const override //Consumed on use.
+	{
+		return true;
+	}
+	String Name() const override //For sorting & finding.
+	{
+		return String("bomb");
+	}
+	String Description() const override //When inspected.
+	{
+		return String("High-yield explosive likely intended for mining. Handle with care.\n\nUSE:\nDeals 17 damage to yourself and any revenants in the room.\n");
+	}
+	String RoomDescription() const override //When found in a room.
+	{
+		return String("Obtained the BOMB.");
+	}
+	void Use() override //When used.
+	{
+
+	}
+	Bomb()
+	{
+
+	}
+};
+
+
 
 class Spell : public Item //Implementation with variable name/damage.
 {
@@ -63,7 +105,7 @@ public:
 	{
 
 	}
-	Spell(String& _name, String& _desc, int _damage = 0, int _self_damage = 0)
+	Spell(String _name, String _desc, int _damage = 0, int _self_damage = 0)
 	{
 		name = _name;
 		desc = _desc;
@@ -90,6 +132,7 @@ public:
 			s += String(to_string(self_damage));
 			s += String(" damage to yourself.\n");
 		}
+		return s;
 	}
 	void Use() override
 	{
@@ -99,9 +142,52 @@ public:
 	{
 		return String("SPL");
 	}
-	static bool Compare(Spell& a, Spell& b)
+};
+class Scroll : public Item
+{
+public:
+	Spell* spell = nullptr;
+	bool Consumable() const override //Consumed on use.
+	{
+		return true;
+	}
+	String Name() const override //For sorting & finding.
+	{
+		String s = spell->Name();
+		s.ToLower();
+		s.Append(" scroll");
+		return s; //Eg. spark scroll
+	}
+	String Description() const override //When inspected.
+	{
+		String s = String("Parchment with enigmatic symbols written all over.\nIt will take time to copy this over to your spellbook.\n\nUse: Adds the spell '");
+		s.Append(spell->Name()).Append("' to your spellbook.");
+		return s;
+	}
+	String RoomDescription() const override //When found in a room.
+	{
+		String s = Name();
+		s.ToUpper();
+		s.Prepend(String("Obtained the "));
+		s.Append(".");
+		return s; //Eg. Obtained the SPARK SCROLL.
+	}
+	void Use() override //When used.
 	{
 
+	}
+	Scroll()
+	{
+		
+	}
+	Scroll(Spell* _spell)
+	{
+		spell = _spell;
+	}
+	~Scroll()
+	{
+		delete spell;
+		spell = nullptr;
 	}
 };
 
