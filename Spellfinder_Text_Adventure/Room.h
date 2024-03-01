@@ -12,9 +12,9 @@ using namespace std;
 class Room
 {
 private:
-	String description;
+	String description = String();
 public:
-	Item* item;
+	Item* item = nullptr;
 	Room()
 	{
 	}

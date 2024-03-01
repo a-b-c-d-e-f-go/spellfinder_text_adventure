@@ -20,8 +20,8 @@ public:
 class Player : public Entity //Different layer, but still uses x and y.
 {
 private:
-	list<Spell> spells;
-	list<Item> items;
+	list<Spell*> spells;
+	list<Item*> items;
 	/*int binarySearch(list<Item> _list, String _low, String _high, String _name) {
 
 		while (_low <= _high) {
@@ -55,7 +55,11 @@ public:
 	}
 	~Player()
 	{
-
+		while (!items.empty()) //Continuously delete and remove item pointers until empty.
+		{
+			delete items.back();
+			items.pop_back();
+		}
 	}
 	Item* FindItem(String& _item) //Finds an Item using binary search.
 	{
@@ -67,16 +71,22 @@ public:
 	}
 	String Inventory() //Returns a complete list of items and spells.
 	{
-		String s = String("ITEMS:\n");
+		String s = String("ITEMS:\n"); //List items.
 		for (auto const& i : items) {
-			s += i.Name();
+			s += i->Name();
+			s += String("\n");
 		}
-		//String("ITEMS:\nLamp\nBox\nCat\n\nSPELLS:\nEruption\nBlizzard\nPetrify\n\n")
+		s += String("\nSPELLS:\n"); //List spells.
+		for (auto const& i : spells) {
+			s += i->Name();
+			s += String("\n");
+		}
+		s += String("\n");
 		return s;
 	}
 	void AddItem(Item* _item)
 	{
-
+		items.push_back(_item);
 		//Sort the list after adding this new item. Items must be in alphabetical order for binary search.
 		/*sort(items.begin(), items.end(),
 		[](const Item& a, const Item& b) {

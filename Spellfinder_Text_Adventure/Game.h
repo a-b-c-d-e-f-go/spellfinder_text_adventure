@@ -11,7 +11,7 @@
 using namespace std;
 
 #define m(s) cout << s << endl //Write to map. Used in Run().
-#define cg << "             " << //Gap between contents of each room. Used in Row_Contents().
+#define cg << "             " << //Gap between players/items in each room. Used in Row_Contents().
 #define eg << "   ##   ##   " << //Gap between enemies in each room. Used in Row_Contents().
 #define prompt String("Enter a command to proceed. 'help' will list all commands.") //Default output before a command is entered.
 #define pos_desc(_x, _y, _string) if (player->x == _x && player->y == _y) {output += String(_string); }
@@ -21,6 +21,10 @@ const char R_OPEN[] =	"#####   #####   #####   #####   #####   #####   #####   #
 const char R_INSIDE[] =	"##         ##   ##         ##   ##         ##   ##         ##"; //Before and after a row of room's contents.
 
 #define newrev(x, y) revenants.push_back(Revenant(x, y)) //Spawns in a revenant at the given coordinates.
+#define wait_for_enter cout << "Press enter to return.\n"; getchar() //Wait for enter key.
+#define inspect_valid_item output = prompt; system("cls"); input.ToUpper().WriteToConsole(); cout << "\n---------------\n"; inspected->Description().WriteToConsole(); //Clear console and write item details to console.
+
+#
 
 class Game
 {
@@ -80,8 +84,8 @@ private:
 	//Drawing
 	const void Row_Contents(const usi r) const //Draws a row within the map that contains players and such.
 	{
-		m("##   " << Enem(0, r) eg Enem(1, r) eg Enem(2, r) eg Enem(3, r) << "   ##");
-		m("##   " << Cont(0, r).CStr() cg Cont(1, r).CStr() cg Cont(2, r).CStr() cg Cont(3, r).CStr() << "   ##");
+		m("##   " << Enem(0, r) eg Enem(1, r) eg Enem(2, r) eg Enem(3, r) << "   ##"); //Enemy layer.
+		m("##   " << Cont(0, r).CStr() cg Cont(1, r).CStr() cg Cont(2, r).CStr() cg Cont(3, r).CStr() << "   ##"); //Player/item layer.
 		m(R_INSIDE);
 	}
 	const char* Enem(usi x, usi y) const //Room enemy.
@@ -290,15 +294,11 @@ private:
 			}
 			else //Valid item.
 			{
-				output = prompt; //Reset command output.
-				system("cls"); //Clear map to make way for command list.
-				input.ToUpper().WriteToConsole(); cout << "\n---------------\n"; //Write item name above the description
-				inspected->Description().WriteToConsole();
-
+				inspect_valid_item;
 				//Write if the item is consumable or not in its description.
 				if (inspected->Consumable()) { cout << "Item is consumed on use.\n\n"; }
 				else { cout << "Item is not consumed on use.\n\n"; }
-				cout << "Press enter to return.\n"; getchar(); //Wait for enter key.
+				wait_for_enter;
 			}
 		}
 		else if (Check_Command(input, String("spell"))) //spell <spell> - Describes a given spell if the player knows it. Otherwise says that they don't.
@@ -310,12 +310,8 @@ private:
 			}
 			else //Valid spell.
 			{
-				output = prompt; //Reset command output.
-				system("cls"); //Clear map to make way for command list.
-				input.ToUpper().WriteToConsole(); cout << "\n---------------\n"; //Write item name above the description
-
-				inspected->Description().WriteToConsole();
-				cout << "Press enter to return.\n"; getchar(); //Wait for enter key.
+				inspect_valid_item;
+				wait_for_enter;
 			}
 		}
 		else if (Check_Command(input, String("use"))) //use <item> - Uses a given item, with an effect from its Use().
@@ -331,7 +327,7 @@ private:
 			output = prompt; //Reset command output.
 			system("cls"); //Clear map to make way for command list.
 			player->Inventory().WriteToConsole(); //List inventory.
-			cout << "Press enter to return.\n"; getchar(); //Wait for enter key.
+			wait_for_enter;
 		}
 		else if (Check_Command(input, String("help"))) //help - Lists all commands.
 		{
@@ -347,8 +343,7 @@ private:
 			cout << "move <north/south/east/west> Moves you 1 room in a given direction.\nThis will end your turn, allowing the revenants to act.\n\n";
 			cout << "use <item> - Uses a given item, which might consume it depending on the item.\nThis will end your turn, allowing the revenants to act.\nUse 'inspect' for more detail on a specific item's effects.\n\n";
 			cout << "cast <known spell> - Casts a given spell, which typically deals damage.\nThis will end your turn, allowing the revenants to act.\nUse 'spell' for more detail on a specific spell's effects.\n\n";
-
-			cout << "Press enter to return.\n"; getchar(); //Wait for enter key.
+			wait_for_enter;
 		}
 		else
 		{

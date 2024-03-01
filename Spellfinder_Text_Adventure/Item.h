@@ -37,15 +37,15 @@ public:
 class Spear : public Item
 {
 public:
-	virtual String Name() const //For sorting & finding.
+	String Name() const override //For sorting & finding.
 	{
 		return String("spear");
 	}
-	String Description() const //When inspected.
+	String Description() const override //When inspected.
 	{
 		return String("A spear with a wooden shaft and a rusted iron point.\nAlthough it was merely for decoration here,\nit seems to have seen use before being held by the statue.\n\nUSE:\nDeals 7 damage to any revenants in the same room.\n");
 	}
-	String RoomDescription() const //When found in a room.
+	String RoomDescription() const override //When found in a room.
 	{
 		return String("The crumbled statue's spear is lying on the ground. Obtained the SPEAR.");
 	}
@@ -54,20 +54,27 @@ public:
 class Spell : public Item //Implementation with variable name/damage.
 {
 private:
-	String name;
-	String desc;
-	int damage;
-	int self_damage;
+	String name = String("Mystery Spell");
+	String desc = String("Mystery Spell Lore");
+	int damage = 0;
+	int self_damage = 0;
 public:
 	Spell()
 	{
 
 	}
-	Spell(String& _name, String& desc, int _damage = 0, int _self_damage = 0)
+	Spell(String& _name, String& _desc, int _damage = 0, int _self_damage = 0)
 	{
-
+		name = _name;
+		desc = _desc;
+		damage = _damage;
+		self_damage = _self_damage;
 	}
-	String Description() const //When inspected.
+	String Name() const //For sorting & finding.
+	{
+		return name;
+	}
+	String Description() const override //When inspected.
 	{
 		String s = desc;
 		s += String("\n\nCAST:\n");
@@ -84,11 +91,11 @@ public:
 			s += String(" damage to yourself.\n");
 		}
 	}
-	void Use()
+	void Use() override
 	{
 
 	}
-	String Shorthand() const //When drawing the map.
+	String Shorthand() const override //When drawing the map.
 	{
 		return String("SPL");
 	}
