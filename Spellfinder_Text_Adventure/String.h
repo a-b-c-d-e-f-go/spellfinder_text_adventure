@@ -202,13 +202,21 @@ public: //External Operators
     {
         return CharacterAt(_index); //Returns const ver.
     }
-    bool operator<(const String& _str) //Returns true if this string comes before rhs in the alphabet.
+    bool operator<(const String& _str) //Returns true if this string comes before _str in the alphabet.
     {
         return (strcmp(CStr(), _str.CStr()) < 0); //strcmp is alphabetically before.
     }
-    bool operator>(const String& _str) //Returns true if this string comes after rhs in the alphabet.
+    bool operator>(const String& _str) //Returns true if this string comes after _str in the alphabet.
     {
         return (strcmp(CStr(), _str.CStr()) > 0); //strcmp is alphabetically after.
+    }
+    bool operator<=(const String& _str) //Returns true if this string comes before or equal to _str in the alphabet.
+    {
+        return !((*this) > _str); //strcmp is not alphabetically after.
+    }
+    bool operator>=(const String & _str) //Returns true if this string comes before or equal to _str in the alphabet.
+    {
+        return !((*this) < _str); //strcmp is not alphabetically before.
     }
     String operator+(const String& _str) const //Return a new string that combines the lhs and rhs.
     {

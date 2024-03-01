@@ -38,7 +38,7 @@ private:
 		},
 		{
 			//1,0: 
-			Room("You enter a room with a line of armored statues holding spears on the north side."),
+			Room("You enter a room with a line of armored statues holding spears on the north side.", new Spear()),
 			//1,1: SPELLBOOK
 			Room("You enter a room with 4 stone pillars at each corner."),
 			//1,2: MOSS
@@ -81,7 +81,7 @@ private:
 	const void Row_Contents(const usi r) const //Draws a row within the map that contains players and such.
 	{
 		m("##   " << Enem(0, r) eg Enem(1, r) eg Enem(2, r) eg Enem(3, r) << "   ##");
-		m("##   " << Cont(0, r) cg Cont(1, r) cg Cont(2, r) cg Cont(3, r) << "   ##");
+		m("##   " << Cont(0, r).CStr() cg Cont(1, r).CStr() cg Cont(2, r).CStr() cg Cont(3, r).CStr() << "   ##");
 		m(R_INSIDE);
 	}
 	const char* Enem(usi x, usi y) const //Room enemy.
@@ -101,14 +101,14 @@ private:
 			default: return "Rx?"; //For more than 9 revenants in one spot.
 		}
 	}
-	const char* Cont(usi x, usi y) const //Room contents.
+	const String Cont(usi x, usi y) const //Room contents.
 	{
-		if (player->x == x && player->y == y) { return "PLA"; } //If a player is present, the item will automatically get picked up (hence why they occupy the same space).
+		if (player->x == x && player->y == y) { return String("PLA"); } //If a player is present, the item will automatically get picked up (hence why they occupy the same space).
 		if (rooms[x][y].item != nullptr) //If an item is present.
 		{
-			return rooms[x][y].item->Shorthand().CStr(); //Use item for room contents.
+			return rooms[x][y].item->Shorthand(); //Use item for room contents.
 		}
-		return "   "; //If nothing is present.
+		return String("   "); //If nothing is present.
 	}
 	const void Draw_Map() const //Draws the entire map.
 	{
@@ -162,7 +162,7 @@ private:
 		rev_count[rev.x][rev.y] += 1; //Increase revenant count where the revenant moved to.
 	}
 
-	const void Revenants_Turn() //Happens when you move, cast a spell, or 
+	const void Revenants_Turn() //Happens when you wait, move, cast a spell, or use an item.
 	{
 		if (revenants.size() > 0) //If there are any remaining revenants.
 		{
@@ -206,6 +206,16 @@ private:
 		Update_Revenant_Count(); //Should update after they move.
 	}
 
+	const void ItemCheck() //Waiting
+	{
+		if ((rev_count[player->x][player->y] <= 0) && (rooms[player->x][player->y].item != nullptr)) //If the room is clear and contains an item.
+		{
+			output += rooms[player->x][player->y].item->RoomDescription(); //Announce item pickup.
+			player->AddItem(rooms[player->x][player->y].item); //Give the item to the player.
+			rooms[player->x][player->y].item = nullptr; //Remove item from room.
+		}
+	}
+
 	//Effects
 	const void Execute(String& input) //Do things based on the player's command.
 	{
@@ -213,6 +223,7 @@ private:
 		{
 			output = String("Skipping your turn. ");
 			Revenants_Turn();
+			ItemCheck();
 		}
 		else if (Check_Command(input, String("move"))) //move <north/south/east/west> - Moves 1 room in a given direction.
 		{
@@ -252,13 +263,17 @@ private:
 				{
 					output += String("\nThere is a revenant in the room with you.");
 				}
-				else //Specific lines that only happen with no revenants.
+				else //Items and certain flavor text can only be accessed when there are no revenants in a room.
 				{
-					pos_desc(0, 3, "\nThrough it, you can see a deep cavern. Wouldn't want to fall down there.");
-					pos_desc(1, 3, "\nYou shouldn't linger here.");
-					pos_desc(2, 1, "\nIt doesn't seem to have been kempt in a while.");
-					pos_desc(2, 3, "\nOne of the tables shudders for a moment, but there's nobody on it.");
-					pos_desc(3, 2, "\nSomething is watching you.");
+					//Specific lines that only happen with no revenants.
+					pos_desc(0, 3, "\nThrough it, you can see a deep cavern. Wouldn't want to fall down there.\n");
+					pos_desc(1, 0, "\nOne of the statues has almost crumbled completely.\n");
+					pos_desc(1, 3, "\nYou shouldn't linger here.\n");
+					pos_desc(2, 1, "\nIt doesn't seem to have been kempt in a while.\n");
+					pos_desc(2, 3, "\nOne of the tables shudders for a moment, but there's nobody on it.\n");
+					pos_desc(3, 2, "\nSomething is watching you.\n");
+					//Items are found after these lines.
+					ItemCheck();
 				}
 			}
 			else //Do not let revenants act here. It'd be pretty frustrating if you gave them a free turn for forgetting there's a wall in the way.
@@ -271,27 +286,36 @@ private:
 			Item* inspected = player->FindItem(input);
 			if (inspected == nullptr) //Invalid item.
 			{
-				output = String("You don't have an item called ").Append(input).Append(String(".")); //Error message.
+				output = String("You don't have an item called ").Append(input).Append(String(".\nUse 'inventory' for a list of items and spells.")); //Error message.
 			}
 			else //Valid item.
 			{
 				output = prompt; //Reset command output.
 				system("cls"); //Clear map to make way for command list.
-				//inspected->Description().WriteToConsole();
+				input.ToUpper().WriteToConsole(); cout << "\n---------------\n"; //Write item name above the description
+				inspected->Description().WriteToConsole();
+
+				//Write if the item is consumable or not in its description.
+				if (inspected->Consumable()) { cout << "Item is consumed on use.\n\n"; }
+				else { cout << "Item is not consumed on use.\n\n"; }
+				cout << "Press enter to return.\n"; getchar(); //Wait for enter key.
 			}
 		}
 		else if (Check_Command(input, String("spell"))) //spell <spell> - Describes a given spell if the player knows it. Otherwise says that they don't.
 		{
 			Spell* inspected = player->FindSpell(input);
-			if (inspected == nullptr) //Invalid item.
+			if (inspected == nullptr) //Invalid spell.
 			{
-				output = String("You don't know a spell called ").Append(input).Append(String(".")); //Error message.
+				output = String("You don't know a spell called ").Append(input).Append(String(".\nUse 'inventory' for a list of items and spells.")); //Error message.
 			}
 			else //Valid spell.
 			{
 				output = prompt; //Reset command output.
 				system("cls"); //Clear map to make way for command list.
-				//inspected->Description().WriteToConsole();
+				input.ToUpper().WriteToConsole(); cout << "\n---------------\n"; //Write item name above the description
+
+				inspected->Description().WriteToConsole();
+				cout << "Press enter to return.\n"; getchar(); //Wait for enter key.
 			}
 		}
 		else if (Check_Command(input, String("use"))) //use <item> - Uses a given item, with an effect from its Use().

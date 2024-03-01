@@ -22,6 +22,27 @@ class Player : public Entity //Different layer, but still uses x and y.
 private:
 	list<Spell> spells;
 	list<Item> items;
+	/*int binarySearch(list<Item> _list, String _low, String _high, String _name) {
+
+		while (_low <= _high) {
+			int _mid = low + (high - low) / 2;
+
+			if (number_to_search_for == _list[mid]) {
+				return _mid;
+			}
+
+			if (number_to_search_for > _list[mid]) {
+				_low = _mid + 1;
+			}
+
+			if (number_to_search_for < _list[mid]) {
+				_high = _mid - 1;
+			}
+
+		}
+
+		return -1;
+	}*/
 public:
 	Player()
 	{
@@ -46,10 +67,21 @@ public:
 	}
 	String Inventory() //Returns a complete list of items and spells.
 	{
-		/*for (auto const& i : items) {
-			std::cout << i.name;
-		}*/
-		return String("ITEMS:\nLamp\nBox\nCat\n\nSPELLS:\nEruption\nBlizzard\nPetrify");
+		String s = String("ITEMS:\n");
+		for (auto const& i : items) {
+			s += i.Name();
+		}
+		//String("ITEMS:\nLamp\nBox\nCat\n\nSPELLS:\nEruption\nBlizzard\nPetrify\n\n")
+		return s;
+	}
+	void AddItem(Item* _item)
+	{
+
+		//Sort the list after adding this new item. Items must be in alphabetical order for binary search.
+		/*sort(items.begin(), items.end(),
+		[](const Item& a, const Item& b) {
+			return a < b;
+		});*/
 	}
 };
 

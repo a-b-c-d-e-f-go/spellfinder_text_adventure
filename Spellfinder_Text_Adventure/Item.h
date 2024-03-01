@@ -11,38 +11,86 @@ using namespace std;
 class Item //Abstract class.
 {
 public:
-	virtual String Description() const; //When inspected.
-	virtual String RoomDescription() const; //When found in a room.
-	virtual void Use(); //When used.
+	virtual bool Consumable() { return false; }
+	virtual String Name() const //For sorting & finding.
+	{
+		return String("ERROR");
+	}
+	virtual String Description() const //When inspected.
+	{
+		return String("ERROR");
+	}
+	virtual String RoomDescription() const //When found in a room.
+	{
+		return String("ERROR");
+	}
+	virtual void Use() //When used.
+	{
+
+	}
 	virtual String Shorthand() const //When drawing the map.
 	{
 		return String("ITM");
 	}
 };
 
-class Spell : Item //Implementation with variable name/damage.
+class Spear : public Item
 {
+public:
+	virtual String Name() const //For sorting & finding.
+	{
+		return String("spear");
+	}
+	String Description() const //When inspected.
+	{
+		return String("A spear with a wooden shaft and a rusted iron point.\nAlthough it was merely for decoration here,\nit seems to have seen use before being held by the statue.\n\nUSE:\nDeals 7 damage to any revenants in the same room.\n");
+	}
+	String RoomDescription() const //When found in a room.
+	{
+		return String("The crumbled statue's spear is lying on the ground. Obtained the SPEAR.");
+	}
+};
+
+class Spell : public Item //Implementation with variable name/damage.
+{
+private:
 	String name;
+	String desc;
 	int damage;
+	int self_damage;
+public:
 	Spell()
 	{
 
 	}
-	Spell(String& _name, int _damage)
+	Spell(String& _name, String& desc, int _damage = 0, int _self_damage = 0)
 	{
 
 	}
 	String Description() const //When inspected.
 	{
-
-	}
-	String RoomDescription() const //When found in a room.
-	{
-
+		String s = desc;
+		s += String("\n\nCAST:\n");
+		if (damage > 0)
+		{
+			s += String("Deals ");
+			s += String(to_string(damage));
+			s += String(" damage to any revenants in the same room.\n");
+		}
+		if (self_damage > 0)
+		{
+			s += String("Deals ");
+			s += String(to_string(self_damage));
+			s += String(" damage to yourself.\n");
+		}
 	}
 	void Use()
 	{
 
+	}
+	String Shorthand() const //When drawing the map.
+	{
+		return String("SPL");
 	}
 	static bool Compare(Spell& a, Spell& b)
 	{
