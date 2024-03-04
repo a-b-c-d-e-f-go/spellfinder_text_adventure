@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
-#include <list>
+#include <vector>
+#include <algorithm>
 #include "Entity.h"
 #include "String.h"
 
@@ -22,29 +23,28 @@ public:
 class Player : public Entity //Different layer, but still uses x and y.
 {
 private:
-	list<Spell*> spells;
-	list<Item*> items;
-	/*int binarySearch(list<Item> _list, String _low, String _high, String _name) {
+	vector<Spell*> spells;
+	vector<Item*> items;
+	int BinarySearch(vector<Item*>& _vector, int _low, int _high, String _name) { //Binary search the item vector according to length of names.
 
 		while (_low <= _high) {
-			int _mid = low + (high - low) / 2;
+			int _mid = _low + (_high - _low) / 2;
 
-			if (number_to_search_for == _list[mid]) {
+			if (_name.Length() == _vector[_mid]->Name().Length()) {
 				return _mid;
 			}
 
-			if (number_to_search_for > _list[mid]) {
+			if (_name.Length() > _vector[_mid]->Name().Length()) {
 				_low = _mid + 1;
 			}
 
-			if (number_to_search_for < _list[mid]) {
+			if (_name.Length() < _vector[_mid]->Name().Length()) {
 				_high = _mid - 1;
 			}
 
 		}
-
 		return -1;
-	}*/
+	}
 public:
 	Player()
 	{
@@ -70,13 +70,15 @@ public:
 	}
 	Item* FindItem(String& _item) //Finds an Item using binary search.
 	{
+		//return items[BinarySearch(items, items.begin(), items.end(), _item)];
 		return nullptr;
 	}
 	Spell* FindSpell(String& _spell) //Finds a Spell using binary search.
 	{
+		//return spells[BinarySearch(spells, spells.begin(), spells.end(), _spell)];
 		return nullptr;
 	}
-	String Inventory() //Returns a complete list of items and spells.
+	String Inventory() //Returns a complete vector of items and spells.
 	{
 		String s = String("ITEMS:\n"); //List items.
 		for (auto const& i : items) {
@@ -93,16 +95,20 @@ public:
 	}
 	void AddItem(Item* _item)
 	{
-		items.push_back(_item);
-		//Sort the list after adding this new item. Items must be in alphabetical order for binary search.
-		//items.sort(Item::Compare);
+		items.push_back(_item); //Add item to items.
+		std::sort(items.begin(), items.end(), Compare); //Sort the vector after adding this new item. Items must be in alphabetical order for binary search.
 	}
 	void AddSpell(Spell* _spell)
 	{
-		spells.push_back(_spell);
-		//Sort the list after adding this new item. Spells must be in alphabetical order for binary search.
-		
+		spells.push_back(_spell); //Add spell to spells.
+		std::sort(spells.begin(),spells.end(),Compare); //Sort the vector after adding this new item. Spells must be in alphabetical order for binary search.
 	}
+	struct { //Compares 2 item's names by length (for binary search).
+		bool operator()(const Item* a, const Item* b) const
+		{
+			return a->Name().Length() < b->Name().Length();
+		}
+	} Compare;
 };
 
 class Revenant : public Entity

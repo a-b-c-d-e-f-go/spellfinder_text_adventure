@@ -11,10 +11,6 @@ using namespace std;
 class Item //Abstract class.
 {
 public:
-	bool Compare(const Item* a, const Item* b)
-	{
-		return (a->Name() < b->Name());
-	}
 	virtual bool Consumable() const { return false; } //Consumed on use?
 	virtual String Name() const //For sorting & finding.
 	{

@@ -40,7 +40,7 @@ private:
 			//0,1: DISCHARGE
 			Room("You enter a room with a scorched floor covered in burnt scrolls.", new Scroll(new Spell(String("discharge"), String("Creates an explosion at your position, damaging everything nearby and (to a lesser extent) yourself."), 10, 4))),
 			//0,2: 
-			Room("DESC"),
+			Room("You enter a room with a creaking wooden floor."),
 			//0,3: (Bottom Left)
 			Room("You enter a room with cracked walls and a hole in the south east corner.")
 		},
