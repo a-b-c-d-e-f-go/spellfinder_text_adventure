@@ -7,8 +7,6 @@
 #define ef else if
 #define usi unsigned short int //Most common int type in this program.
 #define loop(var, min, max) for (usi var = min; var < max; var++)
-#define delete_s(target) if (target != nullptr) { delete target; } //Safe version. Delete target if it exists.
-#define delete_arr(target) if (target != nullptr) { delete[] target; } //Safe version. Delete targeted array if it exists.
 using namespace std;
 
 #define m(s) cout << s << endl //Write to map. Used in Run().
@@ -224,6 +222,25 @@ private:
 		}
 	}
 
+	const void DamageRevenants(int damage) //Damages any revenants in the same room as the player by a given amount.
+	{
+		usi count = 0; //Amount of revenants damaged by the attack.
+		if (rev_count[player->x][player->y] > 0) //If there is more than one revenant.
+		{
+			loop(i, 0, revenants.size()) //For each revenant.
+			{
+				if ((revenants[i]->x == player->x) && (revenants[i]->y == player->y)) //If position matches the player.
+				{
+					revenants[i]->health -= damage;
+					count++;
+				}
+			}
+		}
+		output += String("\nDamaged ");
+		output += String(to_string(count));
+		output += String(" revenants.");
+	}
+
 	//Effects
 	const void Execute(String& input) //Do things based on the player's command.
 	{
@@ -328,7 +345,11 @@ private:
 			else //Valid item. Attempt to use.
 			{
 				output = String("Using item ").Append(input).Append(String(".")); //Announce usage.
-				use->Use(); //Use item.
+				use->Use(player, output); //Use item.
+
+				//Damage & self damage of item.
+				player.health -= use->Self_Damage();
+				DamageRevenants(use->Damage());
 			}
 		}
 		ef(Check_Command(input, String("cast"))) //cast <spell> - Casts a given spell, with an effect from the Use().
@@ -341,7 +362,11 @@ private:
 			else //Valid spell. Attempt to cast.
 			{
 				output = String("Casting spell ").Append(input).Append(String(".")); //Announce casting.
-				cast->Use(); //Cast spell.
+				cast->Use(player, output); //Cast spell.
+
+				//Damage & self damage of spell.
+				player.health -= cast->Self_Damage();
+				DamageRevenants(cast->Damage());
 			}
 		}
 		ef (Check_Command(input, String("inventory"))) //cast <spell> - Casts a given spell, with an effect from the Use().
@@ -396,16 +421,16 @@ public:
 		//Delete rooms.
 		loop(i, 0, map_size)
 		{
-			delete_arr(rooms[i]);
+			delete[] rooms[i];
 		}
-		delete_arr(rooms);
+		delete[] rooms;
 
 		//Delete revenants.
 		revenants.clear();
 		revenants.shrink_to_fit();
 
 		//Delete player.
-		delete_s(player);
+		delete player;
 		player = nullptr;
 	}
 	void Run()

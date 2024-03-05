@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include "Entity.h"
+#include "Item.h"
 #include "String.h"
 
 #define usi unsigned short int
@@ -17,7 +18,7 @@ class Entity
 public:
 	usi x;
 	usi y;
-	usi health;
+	usi health = 20;
 };
 
 class Player : public Entity //Different layer, but still uses x and y.
