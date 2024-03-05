@@ -321,11 +321,27 @@ private:
 		}
 		ef (Check_Command(input, String("use"))) //use <item> - Uses a given item, with an effect from its Use().
 		{
-			//Do something based on what input is (since it's now only the parameter).
+			Item* use = player->FindItem(input);
+			if (use == nullptr) //Invalid item.
+			{
+				output = String("You don't have an item called ").Append(input).Append(String(".\nUse 'inventory' for a list of items and spells.")); //Error message.
+			}
+			else //Valid item. Attempt to use.
+			{
+				output = String("Using item ").Append(input).Append(String("."));
+			}
 		}
-		ef (Check_Command(input, String("cast"))) //cast <spell> - Casts a given spell, with an effect from the Use().
+		ef(Check_Command(input, String("cast"))) //cast <spell> - Casts a given spell, with an effect from the Use().
 		{
-			//Do something based on what input is (since it's now only the parameter).
+			Spell* cast = player->FindSpell(input);
+			if (cast == nullptr) //Invalid spell.
+			{
+				output = String("You don't know a spell called ").Append(input).Append(String(".\nUse 'inventory' for a list of items and spells.")); //Error message.
+			}
+			else //Valid spell. Attempt to cast.
+			{
+				output = String("Casting spell ").Append(input).Append(String("."));
+			}
 		}
 		ef (Check_Command(input, String("inventory"))) //cast <spell> - Casts a given spell, with an effect from the Use().
 		{

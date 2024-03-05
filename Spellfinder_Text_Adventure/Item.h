@@ -58,6 +58,34 @@ public:
 
 	}
 };
+class Apple : public Item
+{
+public:
+	bool Consumable() const override //Consumed on use.
+	{
+		return true;
+	}
+	String Name() const override //For sorting & finding.
+	{
+		return String("apple");
+	}
+	String Description() const override //When inspected.
+	{
+		return String("Apple.\n\nUSE:\nHeals 15 health.\n");
+	}
+	String RoomDescription() const override //When found in a room.
+	{
+		return String("Obtained the APPLE.");
+	}
+	void Use() override //When used.
+	{
+
+	}
+	Apple()
+	{
+
+	}
+};
 class Bomb : public Item
 {
 public:

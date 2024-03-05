@@ -25,23 +25,53 @@ class Player : public Entity //Different layer, but still uses x and y.
 private:
 	vector<Spell*> spells;
 	vector<Item*> items;
-	int BinarySearch(vector<Item*>& _vector, int _low, int _high, String _name) { //Binary search the item vector according to length of names.
+	int BinarySearch(vector<Item*>& _vector, String _name) { //Binary search the item vector according to length of names.
+		if (!_vector.empty()) //If the vector has contents.
+		{
+			int _low = 0;
+			int _high = _vector.size() - 1; //Because vectors start at 0, the max is 1 less than the size.
+			while (_low <= _high)
+			{
+				int _mid = _low + (_high - _low) / 2; //Set midpoint between low and high.
+				//Compare mid to name, partitioning based on if it is higher or lower alphabetically.
+				if (_name == _vector[_mid]->Name()) {
+					return _mid;
+				}
 
-		while (_low <= _high) {
-			int _mid = _low + (_high - _low) / 2;
+				if (_name > _vector[_mid]->Name()) {
+					_low = _mid + 1;
+				}
 
-			if (_name.Length() == _vector[_mid]->Name().Length()) {
-				return _mid;
+				if (_name < _vector[_mid]->Name()) {
+					_high = _mid - 1;
+				}
 			}
 
-			if (_name.Length() > _vector[_mid]->Name().Length()) {
-				_low = _mid + 1;
-			}
+		}
+		return -1;
+	}
+	int BinarySearch_S(vector<Spell*>& _vector, String _name) { //Version for spells. Not familiar enough with templates yet, and there is only 1 different version needed.
+		if (!_vector.empty()) //If the vector has contents.
+		{
+			int _low = 0;
+			int _high = _vector.size() - 1; //Because vectors start at 0, the max is 1 less than the size.
+			while (_low <= _high)
+			{
+				int _mid = _low + (_high - _low) / 2; //Set midpoint between low and high.
+				//Compare mid to name, partitioning based on if it is higher or lower alphabetically.
+				if (_name == _vector[_mid]->Name()) {
+					return _mid;
+				}
 
-			if (_name.Length() < _vector[_mid]->Name().Length()) {
-				_high = _mid - 1;
-			}
+				if (_name > _vector[_mid]->Name()) {
+					_low = _mid + 1;
+				}
 
+				if (_name < _vector[_mid]->Name()) {
+					_high = _mid - 1;
+				}
+			}
+				
 		}
 		return -1;
 	}
@@ -70,14 +100,32 @@ public:
 	}
 	Item* FindItem(String& _item) //Finds an Item using binary search.
 	{
-		//return items[BinarySearch(items, items.begin(), items.end(), _item)];
+		int i = BinarySearch(items, _item); 
+		if (i >= 0) { return items[i]; } //Ignore -1.
 		return nullptr;
 	}
 	Spell* FindSpell(String& _spell) //Finds a Spell using binary search.
 	{
-		//return spells[BinarySearch(spells, spells.begin(), spells.end(), _spell)];
+		int i = BinarySearch_S(spells, _spell);
+		if (i >= 0) { return spells[i]; } //Ignore -1.
 		return nullptr;
 	}
+	void AddItem(Item* _item)
+	{
+		items.push_back(_item); //Add item to items.
+		std::sort(items.begin(), items.end(), Compare); //Sort the vector after adding this new item. Items must be in alphabetical order for binary search.
+	}
+	void AddSpell(Spell* _spell)
+	{
+		spells.push_back(_spell); //Add spell to spells.
+		std::sort(spells.begin(), spells.end(), Compare); //Sort the vector after adding this new item. Spells must be in alphabetical order for binary search.
+	}
+	struct { //Compares 2 item's names alphabetically (for binary search).
+		bool operator()(const Item* a, const Item* b) const
+		{
+			return a->Name() < b->Name();
+		}
+	} Compare;
 	String Inventory() //Returns a complete vector of items and spells.
 	{
 		String s = String("ITEMS:\n"); //List items.
@@ -93,22 +141,6 @@ public:
 		s += String("\n");
 		return s;
 	}
-	void AddItem(Item* _item)
-	{
-		items.push_back(_item); //Add item to items.
-		std::sort(items.begin(), items.end(), Compare); //Sort the vector after adding this new item. Items must be in alphabetical order for binary search.
-	}
-	void AddSpell(Spell* _spell)
-	{
-		spells.push_back(_spell); //Add spell to spells.
-		std::sort(spells.begin(),spells.end(),Compare); //Sort the vector after adding this new item. Spells must be in alphabetical order for binary search.
-	}
-	struct { //Compares 2 item's names by length (for binary search).
-		bool operator()(const Item* a, const Item* b) const
-		{
-			return a->Name().Length() < b->Name().Length();
-		}
-	} Compare;
 };
 
 class Revenant : public Entity
