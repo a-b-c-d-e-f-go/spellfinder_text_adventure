@@ -16,7 +16,7 @@ class Entity
 public:
 	usi x;
 	usi y;
-	usi health;
+	usi health = 20;
 };
 
 class Player : public Entity //Different layer, but still uses x and y.
