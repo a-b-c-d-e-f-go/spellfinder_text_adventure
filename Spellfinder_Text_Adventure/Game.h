@@ -34,20 +34,20 @@ private:
 		{
 			//0,0: ENTRANCE (Top Left)
 			Room("You enter what appears to be the room you came from.\nWhere the entrance used to be is now a solid wall."),
-			//0,1: DISCHARGE
-			Room("You enter a room with a scorched floor covered in burnt scrolls.", new Scroll(new Spell(String("discharge"), String("Creates an explosion at your position, damaging everything nearby and (to a lesser extent) yourself."), 10, 4))),
-			//0,2: 
+			//0,1: MOSS
+			Room("You enter a room with moss-covered walls."),
+			//0,2: BANAL
 			Room("You enter a room with a creaking wooden floor."),
-			//0,3: (Bottom Left)
-			Room("You enter a room with cracked walls and a hole in the south east corner.")
+			//0,3: EDGE (Bottom Left)
+			Room("You enter a room with cracked walls and a hole in the south east corner.", new Bomb())
 		},
 		{
-			//1,0: 
+			//1,0: STATUES
 			Room("You enter a room with a line of armored statues holding spears on the north side.", new Spear()),
-			//1,1: SPELLBOOK
+			//1,1: PILLARS
 			Room("You enter a room with 4 stone pillars at each corner."),
-			//1,2: MOSS
-			Room("You enter a room with moss-covered walls."),
+			//1,2: DISCHARGE
+			Room("You enter a room with a scorched floor covered in burnt scrolls.", new Scroll(new Spell(String("discharge"), String("Creates an explosion at your position, damaging everything nearby and (to a lesser extent) yourself."), 10, 4))),
 			//1,3: PASTA
 			Room("You enter room with no distinguishing features.")
 		},
@@ -55,17 +55,17 @@ private:
 			//2,0: PORTAL
 			Room("You enter a room with an empty staircase leading north up towards an empty tungsten frame about the size of a doorway."),
 			//2,1: GARDEN
-			Room("You enter a small garden filled with luminescent flora."),
-			//2,2: EXODIA
-			Room("You enter a room with diagonal tiles and an obsidian pedestal at its center."),
+			Room("You enter a small garden filled with luminescent flora.", new Glowfruit()),
+			//2,2: HEAL
+			Room("You enter a room with diagonal tiles and an obsidian pedestal at its center.", new Scroll(new Spell(String("heal"), String(""), 0, -10))),
 			//2,3: WEST REVENANT EXIT
 			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be operating tables.")
 		},
 		{
 			//3,0: INDEX (Top Right)
 			Room("You enter a room with bookshelves adorning the northern and eastern walls."),
-			//3,1: DESK
-			Room("You enter a room furnished with a wooden desk, drawer, and chair.\nPaper notes written in incomprehensible symbols are strewn across the floor."),
+			//3,1: RIFT BOLT
+			Room("You enter a room furnished with a wooden desk, drawer, and chair.\nPaper notes written in incomprehensible symbols are strewn across the floor.", new Scroll(new Spell(String("rift bolt"), String("Uses a fracture in spacetime to deal immense damage.\nUnfortunately, it also summons a revenant elsewhere."), 20, 0))),
 			//3,2: NORTH REVENANT EXIT
 			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be lockers on the eastern wall."),
 			//3,3: BOTTOMLESS PIT (Bottom Right)
@@ -211,7 +211,7 @@ private:
 		Update_Revenant_Count(); //Should update after they move.
 	}
 
-	const void ItemCheck() //Waiting
+	const void Item_Check() //Waiting
 	{
 		if ((rev_count[player->x][player->y] <= 0) && (rooms[player->x][player->y].item != nullptr)) //If the room is clear and contains an item.
 		{
@@ -222,11 +222,12 @@ private:
 		}
 	}
 
-	const void DamageRevenants(int damage) //Damages any revenants in the same room as the player by a given amount.
+	const void Damage_Revenants(int damage) //Damages any revenants in the same room as the player by a given amount.
 	{
 		if (damage > 0) //If it has zero damage, it's not an attack, and shouldn't be treated as missed.
 		{
-			usi count = 0; //Amount of revenants damaged by the attack.
+			usi hits = 0; //Amount of revenants damaged by the attack.
+			usi kills = 0; //Amount of revenants kills by the attack.
 			if (rev_count[player->x][player->y] > 0) //If there is more than one revenant.
 			{
 				loop(i, 0, revenants.size()) //For each revenant.
@@ -234,19 +235,30 @@ private:
 					if ((revenants[i].x == player->x) && (revenants[i].y == player->y)) //If position matches the player.
 					{
 						revenants[i].health -= damage;
-						count++;
+						hits++;
+						if (revenants[i].health <= 0)
+						{
+							kills++;
+							revenants.erase(revenants.begin() + i);
+						}
 					}
 				}
 			}
-			if (count > 0) //If there are revenants in the room.
+			if (hits > 0) //If there are revenants in the room.
 			{
-				output += String("\nDamaged ");
-				output += String(to_string(count));
-				output += String(" revenants.");
+				output += String("\nHit ");
+				output += String(to_string(hits));
+				output += String(" revenant(s). ");
+				if (kills > 0)
+				{
+					output += String(" Killed ");
+					output += String(to_string(kills));
+					output += String(" revenant(s). ");
+				}
 			}
 			else //If there are no revenants in the room.
 			{
-				output += String("\nMissed!");
+				output += String("\nMissed! ");
 			}
 		}
 	}
@@ -258,7 +270,7 @@ private:
 		{
 			output = String("Skipping your turn. ");
 			Revenants_Turn();
-			ItemCheck();
+			Item_Check();
 		}
 		ef (Check_Command(input, String("move"))) //move <north/south/east/west> - Moves 1 room in a given direction.
 		{
@@ -308,7 +320,7 @@ private:
 					pos_desc(2, 3, "\nOne of the tables shudders for a moment, but there's nobody on it.");
 					pos_desc(3, 2, "\nSomething is watching you.");
 					//Items are found after these lines.
-					ItemCheck();
+					Item_Check();
 				}
 			}
 			else //Do not let revenants act here. It'd be pretty frustrating if you gave them a free turn for forgetting there's a wall in the way.
@@ -359,7 +371,8 @@ private:
 
 				//Damage & self damage of item.
 				player->health -= use->Self_Damage();
-				DamageRevenants(use->Damage());
+				Damage_Revenants(use->Damage());
+				Revenants_Turn(); //Since it's an action with effects (such as an attack), the revenants should act afterwards.
 			}
 		}
 		ef(Check_Command(input, String("cast"))) //cast <spell> - Casts a given spell, with an effect from the Use().
@@ -376,7 +389,8 @@ private:
 
 				//Damage & self damage of spell.
 				player->health -= cast->Self_Damage();
-				DamageRevenants(cast->Damage());
+				Damage_Revenants(cast->Damage());
+				Revenants_Turn(); //Since it's an action with effects (such as an attack), the revenants should act afterwards.
 			}
 		}
 		ef (Check_Command(input, String("inventory"))) //cast <spell> - Casts a given spell, with an effect from the Use().
