@@ -229,9 +229,9 @@ private:
 		{
 			loop(i, 0, revenants.size()) //For each revenant.
 			{
-				if ((revenants[i]->x == player->x) && (revenants[i]->y == player->y)) //If position matches the player.
+				if ((revenants[i].x == player->x) && (revenants[i].y == player->y)) //If position matches the player.
 				{
-					revenants[i]->health -= damage;
+					revenants[i].health -= damage;
 					count++;
 				}
 			}
@@ -335,7 +335,7 @@ private:
 				wait_for_enter();
 			}
 		}
-		ef (Check_Command(input, String("use"))) //use <item> - Uses a given item, with an effect from its Use().
+		ef(Check_Command(input, String("use"))) //use <item> - Uses a given item, with an effect from its Use().
 		{
 			Item* use = player->FindItem(input);
 			if (use == nullptr) //Invalid item.
