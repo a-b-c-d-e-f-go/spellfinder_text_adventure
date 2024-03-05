@@ -11,6 +11,14 @@ using namespace std;
 class Item //Abstract class.
 {
 public:
+	virtual int Damage() //Damage to anything else in the room.
+	{
+		return 0;
+	}
+	virtual int Self_Damage() //Damage to the player. Negative is healing.
+	{
+		return 0;
+	}
 	virtual bool Consumable() const { return false; } //Consumed on use?
 	virtual String Name() const //For sorting & finding.
 	{
@@ -43,15 +51,15 @@ public:
 	}
 	String Description() const override //When inspected.
 	{
-		return String("A spear with a wooden shaft and a rusted iron point.\nAlthough it was merely for decoration here,\nit seems to have seen use before being held by the statue.\n\nUSE:\nDeals 7 damage to any revenants in the same room.\n");
+		return String("A spear with a wooden shaft and a rusted iron point.\nAlthough it was merely for decoration here,\nit seems to have seen use before being held by the statue.\n\nUSE:\n");
 	}
 	String RoomDescription() const override //When found in a room.
 	{
 		return String("The crumbled statue's spear is lying on the ground. Obtained the SPEAR.");
 	}
-	void Use() override //When used.
+	int Damage() override //Begginer weapon, but better than spark.
 	{
-
+		return 7;
 	}
 	Spear()
 	{
@@ -71,7 +79,7 @@ public:
 	}
 	String Description() const override //When inspected.
 	{
-		return String("Apple.\n\nUSE:\nHeals 15 health.\n");
+		return String("Apple.\n\nUSE:\n");
 	}
 	String RoomDescription() const override //When found in a room.
 	{
@@ -99,15 +107,19 @@ public:
 	}
 	String Description() const override //When inspected.
 	{
-		return String("High-yield explosive likely intended for mining. Handle with care.\n\nUSE:\nDeals 17 damage to yourself and any revenants in the room.\n");
+		return String("High-yield explosive likely intended for mining. Handle with care.\n\nUSE:\n");
 	}
 	String RoomDescription() const override //When found in a room.
 	{
 		return String("Obtained the BOMB.");
 	}
-	void Use() override //When used.
+	int Damage() override //High damage.
 	{
-
+		return 15;
+	}
+	int Self_Damage() override //The kamikaze weapon. No reason not to use it if it kills remaining revenants but not you, but otherwise risky.
+	{
+		return 15;
 	}
 	Bomb()
 	{
@@ -125,6 +137,14 @@ private:
 	int damage = 0;
 	int self_damage = 0;
 public:
+	int Damage() override //Damage to anything else in the room.
+	{
+		return damage;
+	}
+	int Self_Damage() override //Damage to the player. Negative is healing.
+	{
+		return self_damage;
+	}
 	Spell()
 	{
 
@@ -144,18 +164,6 @@ public:
 	{
 		String s = desc;
 		s += String("\n\nCAST:\n");
-		if (damage > 0)
-		{
-			s += String("Deals ");
-			s += String(to_string(damage));
-			s += String(" damage to any revenants in the same room.\n");
-		}
-		if (self_damage > 0)
-		{
-			s += String("Deals ");
-			s += String(to_string(self_damage));
-			s += String(" damage to yourself.\n");
-		}
 		return s;
 	}
 	void Use() override
