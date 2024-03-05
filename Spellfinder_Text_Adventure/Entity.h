@@ -8,8 +8,6 @@
 
 #define usi unsigned short int
 #define loop(var, min, max) for (usi var = min; var < max; var++)
-#define delete_s(target) if (target != nullptr) { delete target; } //Safe version. Delete target if it exists.
-#define delete_arr(target) if (target != nullptr) { delete[] target; } //Safe version. Delete targeted array if it exists.
 
 using namespace std;
 
@@ -72,7 +70,7 @@ private:
 					_high = _mid - 1;
 				}
 			}
-				
+
 		}
 		return -1;
 	}
@@ -101,7 +99,7 @@ public:
 	}
 	Item* FindItem(String& _item) //Finds an Item using binary search.
 	{
-		int i = BinarySearch(items, _item); 
+		int i = BinarySearch(items, _item);
 		if (i >= 0) { return items[i]; } //Ignore -1.
 		return nullptr;
 	}
