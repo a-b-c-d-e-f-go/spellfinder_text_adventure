@@ -24,7 +24,7 @@ public:
 	{
 		return String("ERROR");
 	}
-	virtual void Use() //When used.
+	virtual void Use(String& _output) //When used.
 	{
 
 	}
@@ -49,16 +49,12 @@ public:
 	{
 		return String("The crumbled statue's spear is lying on the ground. Obtained the SPEAR.");
 	}
-	void Use() override //When used.
-	{
-
-	}
 	Spear()
 	{
 
 	}
 };
-class Apple : public Item
+class Glowfruit : public Item
 {
 public:
 	bool Consumable() const override //Consumed on use.
@@ -67,21 +63,21 @@ public:
 	}
 	String Name() const override //For sorting & finding.
 	{
-		return String("apple");
+		return String("glowfruit");
 	}
 	String Description() const override //When inspected.
 	{
-		return String("Apple.\n\nUSE:\nHeals 15 health.\n");
+		return String("Strange glowing fruit with an apple-ish flavour.\n\nUSE:\n");
 	}
 	String RoomDescription() const override //When found in a room.
 	{
-		return String("Obtained the APPLE.");
+		return String("There's something hanging from one of the plants. Obtained the GLOWFRUIT.");
 	}
-	void Use() override //When used.
-	{
-
-	}
-	Apple()
+	//int Self_Damage() override //Item gives a full heal. You'll need it.
+	//{
+	//	return -20;
+	//}
+	Glowfruit()
 	{
 
 	}
@@ -104,10 +100,6 @@ public:
 	String RoomDescription() const override //When found in a room.
 	{
 		return String("Obtained the BOMB.");
-	}
-	void Use() override //When used.
-	{
-
 	}
 	Bomb()
 	{
@@ -158,10 +150,6 @@ public:
 		}
 		return s;
 	}
-	void Use() override
-	{
-
-	}
 	String Shorthand() const override //When drawing the map.
 	{
 		return String("SPL");
@@ -195,10 +183,6 @@ public:
 		s.Prepend(String("Obtained the "));
 		s.Append(".");
 		return s; //Eg. Obtained the SPARK SCROLL.
-	}
-	void Use() override //When used.
-	{
-
 	}
 	Scroll()
 	{

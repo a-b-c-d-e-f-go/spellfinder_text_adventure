@@ -338,7 +338,7 @@ private:
 				wait_for_enter();
 			}
 		}
-		ef (Check_Command(input, String("use"))) //use <item> - Uses a given item, with an effect from its Use().
+		ef(Check_Command(input, String("use"))) //use <item> - Uses a given item, with an effect from its Use().
 		{
 			Item* use = player->FindItem(input);
 			if (use == nullptr) //Invalid item.
@@ -347,7 +347,12 @@ private:
 			}
 			else //Valid item. Attempt to use.
 			{
-				output = String("Using item ").Append(input).Append(String("."));
+				output = String("Using item ").Append(input).Append(String(".")); //Announce usage.
+				use->Use(output); //Use item.
+
+				//Damage & self damage of item.
+				//player.health -= use->Self_Damage();
+				//DamageRevenants(use->Damage());
 			}
 		}
 		ef(Check_Command(input, String("cast"))) //cast <spell> - Casts a given spell, with an effect from the Use().
@@ -359,7 +364,12 @@ private:
 			}
 			else //Valid spell. Attempt to cast.
 			{
-				output = String("Casting spell ").Append(input).Append(String("."));
+				output = String("Casting spell ").Append(input).Append(String(".")); //Announce casting.
+				cast->Use(output); //Cast spell.
+
+				//Damage & self damage of spell.
+				//player.health -= cast->Self_Damage();
+				//DamageRevenants(cast->Damage());
 			}
 		}
 		ef (Check_Command(input, String("inventory"))) //cast <spell> - Casts a given spell, with an effect from the Use().
