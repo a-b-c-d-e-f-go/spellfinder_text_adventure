@@ -224,21 +224,31 @@ private:
 
 	const void DamageRevenants(int damage) //Damages any revenants in the same room as the player by a given amount.
 	{
-		usi count = 0; //Amount of revenants damaged by the attack.
-		if (rev_count[player->x][player->y] > 0) //If there is more than one revenant.
+		if (damage > 0) //If it has zero damage, it's not an attack, and shouldn't be treated as missed.
 		{
-			loop(i, 0, revenants.size()) //For each revenant.
+			usi count = 0; //Amount of revenants damaged by the attack.
+			if (rev_count[player->x][player->y] > 0) //If there is more than one revenant.
 			{
-				if ((revenants[i].x == player->x) && (revenants[i].y == player->y)) //If position matches the player.
+				loop(i, 0, revenants.size()) //For each revenant.
 				{
-					revenants[i].health -= damage;
-					count++;
+					if ((revenants[i].x == player->x) && (revenants[i].y == player->y)) //If position matches the player.
+					{
+						revenants[i].health -= damage;
+						count++;
+					}
 				}
 			}
+			if (count > 0) //If there are revenants in the room.
+			{
+				output += String("\nDamaged ");
+				output += String(to_string(count));
+				output += String(" revenants.");
+			}
+			else //If there are no revenants in the room.
+			{
+				output += String("\nMissed!");
+			}
 		}
-		output += String("\nDamaged ");
-		output += String(to_string(count));
-		output += String(" revenants.");
 	}
 
 	//Effects
@@ -345,10 +355,10 @@ private:
 			else //Valid item. Attempt to use.
 			{
 				output = String("Using item ").Append(input).Append(String(".")); //Announce usage.
-				use->Use(player, output); //Use item.
+				use->Use(output); //Use item.
 
 				//Damage & self damage of item.
-				player.health -= use->Self_Damage();
+				player->health -= use->Self_Damage();
 				DamageRevenants(use->Damage());
 			}
 		}
@@ -362,10 +372,10 @@ private:
 			else //Valid spell. Attempt to cast.
 			{
 				output = String("Casting spell ").Append(input).Append(String(".")); //Announce casting.
-				cast->Use(player, output); //Cast spell.
+				cast->Use(output); //Cast spell.
 
 				//Damage & self damage of spell.
-				player.health -= cast->Self_Damage();
+				player->health -= cast->Self_Damage();
 				DamageRevenants(cast->Damage());
 			}
 		}

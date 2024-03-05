@@ -3,10 +3,7 @@
 #pragma once
 #include <iostream>
 #include "String.h"
-#include "Entity.h"
 #define usi unsigned short int
-#define delete_s(target) if (target != nullptr) { delete target; } //Safe version. Delete target if it exists.
-#define delete_arr(target) if (target != nullptr) { delete[] target; } //Safe version. Delete targeted array if it exists.
 using namespace std;
 
 class Item //Abstract class.
@@ -33,26 +30,26 @@ public:
 	{
 		return String("ERROR");
 	}
-	virtual void Use(Player* _player, String& _output) //When used.
+	virtual void Use(String& _output) //When used.
 	{
-		//if (Damage() > 0) //Can't be specific to revenants present because it's not in the Game class.
-		//{
-		//	_output += String("\nDealt ");
-		//	_output += String(to_string(Damage()));
-		//	_output += String(" damage in this room.");
-		//}
-		//if (Self_Damage() > 0)
-		//{
-		//	_output += String("\nDealt ");
-		//	_output += String(to_string(Self_Damage()));
-		//	_output += String(" damage to you.");
-		//}
-		//else if (Self_Damage() < 0)
-		//{
-		//	_output += String("\nHealed ");
-		//	_output += String(to_string(Self_Damage() * -1));
-		//	_output += String(" health.");
-		//}
+		if (Damage() > 0) //Can't be specific to revenants present because it's not in the Game class.
+		{
+			_output += String("\nAttacked for ");
+			_output += String(to_string(Damage()));
+			_output += String(" damage.");
+		}
+		if (Self_Damage() > 0)
+		{
+			_output += String("\nDealt ");
+			_output += String(to_string(Self_Damage()));
+			_output += String(" damage to yourself.");
+		}
+		else if (Self_Damage() < 0)
+		{
+			_output += String("\nHealed ");
+			_output += String(to_string(Self_Damage() * -1));
+			_output += String(" health.");
+		}
 	}
 	virtual String Shorthand() const //When drawing the map.
 	{
@@ -204,8 +201,8 @@ public:
 	}
 	String Description() const override //When inspected.
 	{
-		String s = String("Parchment with enigmatic symbols written all over.\nIt will take time to copy this over to your spellbook.\n\nUse: Adds the spell '");
-		s.Append(spell->Name()).Append("' to your spellbook.");
+		String s = String("Parchment with enigmatic symbols written all over.\nIt will take time to copy this over to your spellbook.\n\nUSE:\nAdds the spell '");
+		s.Append(spell->Name()).Append("' to your spellbook.\n");
 		return s;
 	}
 	String RoomDescription() const override //When found in a room.
