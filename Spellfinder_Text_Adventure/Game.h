@@ -225,6 +225,25 @@ private:
 		}
 	}
 
+	const void DamageRevenants(int damage) //Damages any revenants in the same room as the player by a given amount.
+	{
+		usi count = 0; //Amount of revenants damaged by the attack.
+		if (rev_count[player->x][player->y] > 0) //If there is more than one revenant.
+		{
+			loop(i, 0, revenants.size()) //For each revenant.
+			{
+				if ((revenants[i].x == player->x) && (revenants[i].y == player->y)) //If position matches the player.
+				{
+					revenants[i].health -= damage;
+					count++;
+				}
+			}
+		}
+		output += String("\nDamaged ");
+		output += String(to_string(count));
+		output += String(" revenants.");
+	}
+
 	//Effects
 	const void Execute(String& input) //Do things based on the player's command.
 	{
