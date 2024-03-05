@@ -33,9 +33,26 @@ public:
 	{
 		return String("ERROR");
 	}
-	virtual void Use() //When used.
+	virtual void Use(Player* _player, String& _output) //When used.
 	{
-
+		//if (Damage() > 0) //Can't be specific to revenants present because it's not in the Game class.
+		//{
+		//	_output += String("\nDealt ");
+		//	_output += String(to_string(Damage()));
+		//	_output += String(" damage in this room.");
+		//}
+		//if (Self_Damage() > 0)
+		//{
+		//	_output += String("\nDealt ");
+		//	_output += String(to_string(Self_Damage()));
+		//	_output += String(" damage to you.");
+		//}
+		//else if (Self_Damage() < 0)
+		//{
+		//	_output += String("\nHealed ");
+		//	_output += String(to_string(Self_Damage() * -1));
+		//	_output += String(" health.");
+		//}
 	}
 	virtual String Shorthand() const //When drawing the map.
 	{
@@ -67,7 +84,7 @@ public:
 
 	}
 };
-class Apple : public Item
+class Glowfruit : public Item
 {
 public:
 	bool Consumable() const override //Consumed on use.
@@ -76,21 +93,21 @@ public:
 	}
 	String Name() const override //For sorting & finding.
 	{
-		return String("apple");
+		return String("glowfruit");
 	}
 	String Description() const override //When inspected.
 	{
-		return String("Apple.\n\nUSE:\n");
+		return String("Strange glowing fruit with an apple-ish flavour.\n\nUSE:\n");
 	}
 	String RoomDescription() const override //When found in a room.
 	{
-		return String("Obtained the APPLE.");
+		return String("There's something hanging from one of the plants. Obtained the GLOWFRUIT.");
 	}
-	void Use() override //When used.
+	int Self_Damage() override //Item gives a full heal. You'll need it.
 	{
-
+		return -20;
 	}
-	Apple()
+	Glowfruit()
 	{
 
 	}
@@ -118,7 +135,7 @@ public:
 	{
 		return 15;
 	}
-	int Self_Damage() override //The kamikaze weapon. No reason not to use it if it kills remaining revenants but not you, but otherwise risky.
+	int Self_Damage() override //The kamikaze weapon. No reason not to use it if it kills remaining revenants and not you, but otherwise risky.
 	{
 		return 15;
 	}
@@ -127,8 +144,6 @@ public:
 
 	}
 };
-
-
 
 class Spell : public Item //Implementation with variable name/damage.
 {
@@ -167,10 +182,6 @@ public:
 		s += String("\n\nCAST:\n");
 		return s;
 	}
-	void Use() override
-	{
-
-	}
 	String Shorthand() const override //When drawing the map.
 	{
 		return String("SPL");
@@ -204,10 +215,6 @@ public:
 		s.Prepend(String("Obtained the "));
 		s.Append(".");
 		return s; //Eg. Obtained the SPARK SCROLL.
-	}
-	void Use() override //When used.
-	{
-
 	}
 	Scroll()
 	{
