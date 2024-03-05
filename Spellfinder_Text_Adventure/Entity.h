@@ -70,7 +70,7 @@ private:
 					_high = _mid - 1;
 				}
 			}
-				
+
 		}
 		return -1;
 	}
@@ -99,7 +99,7 @@ public:
 	}
 	Item* FindItem(String& _item) //Finds an Item using binary search.
 	{
-		int i = BinarySearch(items, _item); 
+		int i = BinarySearch(items, _item);
 		if (i >= 0) { return items[i]; } //Ignore -1.
 		return nullptr;
 	}
