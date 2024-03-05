@@ -7,8 +7,6 @@
 #define ef else if
 #define usi unsigned short int //Most common int type in this program.
 #define loop(var, min, max) for (usi var = min; var < max; var++)
-#define delete_s(target) if (target != nullptr) { delete target; } //Safe version. Delete target if it exists.
-#define delete_arr(target) if (target != nullptr) { delete[] target; } //Safe version. Delete targeted array if it exists.
 using namespace std;
 
 #define m(s) cout << s << endl //Write to map. Used in Run().
@@ -22,16 +20,15 @@ const char R_OPEN[] =	"#####   #####   #####   #####   #####   #####   #####   #
 const char R_INSIDE[] =	"##         ##   ##         ##   ##         ##   ##         ##"; //Before and after a row of room's contents.
 
 #define newrev(x, y) revenants.push_back(Revenant(x, y)) //Spawns in a revenant at the given coordinates.
-#define inspect_valid_item output = prompt; system("cls"); input.ToUpper().WriteToConsole(); cout << "\n---------------\n"; inspected->Description().WriteToConsole(); //Clear console and write item details to console.
-
-#
+#define inspect_valid_item output = prompt; system("cls"); input.ToUpper().WriteToConsole(); cout << "\n---------------\n"; inspected->Description().WriteToConsole();//Clear console and write item details to console.
+#define valid_item_stats if (inspected->Damage() > 0) { cout << "Deals " << to_string(inspected->Damage()) << " damage to any revenants in the same room.\n"; } if (inspected->Self_Damage() > 0) { cout << "Deals " << to_string(inspected->Self_Damage()) << " damage to yourself.\n"; } if (inspected->Self_Damage() < 0) { cout << "Heals you for " << to_string(inspected->Self_Damage() * -1) << " health.\n"; } //Shown below USE:
 
 class Game
 {
 private:
 	const void wait_for_enter() const
 	{
-		cout << "Press enter to return.\n"; getchar(); //Wait for enter key.
+		cout << "\nPress enter to return.\n"; getchar(); //Wait for enter key.
 	}
 	Room rooms[map_size][map_size] = { //Create room array.
 		{
@@ -318,7 +315,7 @@ private:
 			}
 			else //Valid item.
 			{
-				inspect_valid_item;
+				inspect_valid_item; valid_item_stats;
 				//Write if the item is consumable or not in its description.
 				if (inspected->Consumable()) { cout << "Item is consumed on use.\n\n"; }
 				else { cout << "Item is not consumed on use.\n\n"; }
@@ -334,7 +331,7 @@ private:
 			}
 			else //Valid spell.
 			{
-				inspect_valid_item;
+				inspect_valid_item; valid_item_stats;
 				wait_for_enter();
 			}
 		}
@@ -348,11 +345,11 @@ private:
 			else //Valid item. Attempt to use.
 			{
 				output = String("Using item ").Append(input).Append(String(".")); //Announce usage.
-				use->Use(output); //Use item.
+				use->Use(player, output); //Use item.
 
 				//Damage & self damage of item.
-				//player.health -= use->Self_Damage();
-				//DamageRevenants(use->Damage());
+				player.health -= use->Self_Damage();
+				DamageRevenants(use->Damage());
 			}
 		}
 		ef(Check_Command(input, String("cast"))) //cast <spell> - Casts a given spell, with an effect from the Use().
@@ -365,11 +362,11 @@ private:
 			else //Valid spell. Attempt to cast.
 			{
 				output = String("Casting spell ").Append(input).Append(String(".")); //Announce casting.
-				cast->Use(output); //Cast spell.
+				cast->Use(player, output); //Cast spell.
 
 				//Damage & self damage of spell.
-				//player.health -= cast->Self_Damage();
-				//DamageRevenants(cast->Damage());
+				player.health -= cast->Self_Damage();
+				DamageRevenants(cast->Damage());
 			}
 		}
 		ef (Check_Command(input, String("inventory"))) //cast <spell> - Casts a given spell, with an effect from the Use().
@@ -424,16 +421,16 @@ public:
 		//Delete rooms.
 		loop(i, 0, map_size)
 		{
-			delete_arr(rooms[i]);
+			delete[] rooms[i];
 		}
-		delete_arr(rooms);
+		delete[] rooms;
 
 		//Delete revenants.
 		revenants.clear();
 		revenants.shrink_to_fit();
 
 		//Delete player.
-		delete_s(player);
+		delete player;
 		player = nullptr;
 	}
 	void Run()
