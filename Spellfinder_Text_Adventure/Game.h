@@ -48,25 +48,25 @@ private:
 			Room("You enter a room with a line of armored statues holding spears on the north side.", new Spear()),
 			//1,1: PILLARS
 			Room("You enter a room with 4 stone pillars at each corner."),
-			//1,2: DISCHARGE
-			Room("You enter a room with a scorched floor covered in burnt scrolls.", new Scroll(new Spell(String("discharge"), String("Creates an explosion at your position,\ndamaging everything nearby and (to a lesser extent) yourself."), 12, 4))),
+			//1,2: FIREBALL
+			Room("You enter a room with a scorched floor covered in burnt scrolls.", new Scroll(new Spell(String("fireball"), String("Creates an explosion at your position,\ndamaging everything nearby and (to a lesser extent) yourself."), 12, 4))),
 			//1,3: PASTA
 			Room("You enter room with no distinguishing features.")
 		},
 		{
 			//2,0: PORTAL
-			Room("You enter a room with an empty staircase leading north,\nup towards an empty tungsten frame about the size of a doorway."),
+			Room("You enter a room with a staircase leading north,\nup towards an empty tungsten frame about the size of a doorway."),
 			//2,1: GARDEN
 			Room("You enter a small garden filled with luminescent flora.", new Glowfruit()),
 			//2,2: HEAL
-			Room("You enter a room with diagonal tiles and an obsidian pedestal at its center.", new Scroll(new Spell(String("heal"), String("Quickly mends most non-lethal wounds."), 0, -12))),
+			Room("You enter a room with diagonal tiles and an obsidian pedestal at its center.", new Scroll(new Spell(String("heal"), String("Quickly mends most non-lethal wounds."), 0, -6))),
 			//2,3: WEST REVENANT EXIT
 			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be operating tables.")
 		},
 		{
 			//3,0: INDEX (Top Right)
 			Room("You enter a room with bookshelves adorning the northern and eastern walls."),
-			//3,1: RIFT BOLT
+			//3,1: VORTEX
 			Room("You enter a room furnished with a wooden desk, drawer, and chair.\nPaper notes written in incomprehensible symbols are strewn across the floor.", new Scroll(new Spell(String("vortex"), String("Uses a fracture in spacetime to deal immense damage.\nUnfortunately, it also summons more revenants elsewhere."), 999, -3))),
 			//3,2: NORTH REVENANT EXIT
 			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be lockers on the eastern wall."),
@@ -201,6 +201,7 @@ private:
 		if (revenants.size() > 0) //If there are any remaining revenants.
 		{
 			usi attacks = 0;
+			usi recovers = 0;
 			output += String("The revenants take their turn.\n");
 
 			loop(i, 0, revenants.size()) //For each revenant that exists.
@@ -214,6 +215,12 @@ private:
 					if ((revenants[i].x == player->x) && (revenants[i].y == player->y)) //At player's position. Attempt to attack.
 					{
 						attacks++;
+					}
+					ef((revenants[i].x == player->px) && (revenants[i].y == player->py) && revenants[i].health < 20) //The player left the revenant's room this turn, and the revenant is damaged. Recover health and give a head start.
+					{
+						recovers++;
+						revenants[i].health += 4; //Heal by 4 and don't move.
+						if (revenants[i].health > 20) { revenants[i].health = 20; } //Cap health at 20.
 					}
 					else //Not at player's position. Attempt to close in.
 					{
@@ -255,6 +262,17 @@ private:
 					output += String(attacks).Append(String(" revenants attack for ").Append(attacks * 3).Append(String(" damage.\n")));
 				}
 				player->health -= (3 * attacks); //Damage the player.
+			}
+			if (recovers > 0) //Announce revenant recoveries.
+			{
+				if (recovers == 1)
+				{
+					output += String("A revenant recovered 4 health.\n");
+				}
+				else
+				{
+					output += String(recovers).Append(String(" revenants recovered 4 health each.\n"));
+				}
 			}
 			
 		}
@@ -341,6 +359,17 @@ private:
 				{
 					gamestate = 1; //Win the game.
 				}
+				ef (player->x == 1 && player->y == 1) //If the player is in the pillars room.
+				{
+					output += String("\nThe pillars are displeased with your aimless shenanigains!\n"); //In my defense, it was funny.
+					loop(i, 0, 4) //Fills the map with revenants. Good luck!
+					{
+						loop(j, 0, 4)
+						{
+							newrev(i, j);
+						}
+					}
+				}
 				else
 				{
 					output += String("\nNothing happened... ");
@@ -367,6 +396,7 @@ private:
 	}
 	const void Execute(String& input) //Do things based on the player's command.
 	{
+		player->px = -1; player->py = -1; //Reset previous position if not moving.
 		if (Check_Command(input, String("wait"))) //wait - Does nothing, allowing the revenants to take their turn.
 		{
 			output = String("Skipping your turn. ");
@@ -394,6 +424,7 @@ private:
 
 			if (valid)
 			{
+				player->px = player->x; player->py = player->y; //Update previous position when moved.
 				player->x += xv; player->y += yv; //Move player.
 				output = String("Moved 1 room ") + input + String(". "); //Announce new room the player has entered.
 
@@ -524,13 +555,6 @@ public:
 		{
 			newrev(3, 3);
 		}
-		/*loop(i, 0, 4) Death
-		{
-			loop(j, 0, 4)
-			{
-				newrev(i, j);
-			}
-		}*/
 	}
 	~Game() //Destructor
 	{

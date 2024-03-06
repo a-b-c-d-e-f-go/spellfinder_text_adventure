@@ -109,7 +109,7 @@ public:
 	}
 	String Description() const override //When inspected.
 	{
-		return String("Strange glowing fruit with an apple-ish flavour.\n\nUSE:\n");
+		return String("Strange bioluminescant fruit with an apple-ish scent.\n\nUSE:\n");
 	}
 	String RoomDescription() const override //When found in a room.
 	{
@@ -150,7 +150,7 @@ public:
 	}
 	int Damage() override //High damage.
 	{
-		return 15;
+		return 20;
 	}
 	int Self_Damage() override //The kamikaze weapon. No reason not to use it if it kills remaining revenants and not you, but otherwise risky.
 	{
@@ -200,6 +200,10 @@ public:
 		if (name == String("activate"))
 		{
 			s += String("Activates a portal, if there is one in this room.\n");
+		}
+		if (name == String("vortex"))
+		{
+			s += String("Spawns 3 revenants in room (1,3).\n");
 		}
 		return s;
 	}

@@ -60,6 +60,9 @@ private:
 		return BinarySearch((vector<Item*>&)_vector, _name); //The easy way.
 	}
 public:
+	//Previous X & Y.
+	short int px = -1;
+	short int py = -1;
 	Player() //Empty constructor.
 	{
 
