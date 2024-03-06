@@ -5,7 +5,7 @@
 #include "Room.h"
 #include "Entity.h"
 
-#define ef else if
+#define ef else if //Makes both types of if 2 characters, so else if chains look cleaner.
 #define usi unsigned short int //Most common int type in this program.
 #define loop(var, min, max) for (usi var = min; var < max; var++)
 using namespace std;
