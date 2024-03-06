@@ -144,7 +144,7 @@ private:
 	}
 	const String Cont(usi x, usi y) const //Room contents.
 	{
-		if (player->x == x && player->y == y) { return String("PLA"); } //If a player is present, the item will automatically get picked up (hence why they occupy the same space).
+		if (player->x == x && player->y == y) { return String("YOU"); } //If a player is present, the item will automatically get picked up (hence why they occupy the same space).
 		if (rooms[x][y].item != nullptr) //If an item is present.
 		{
 			return rooms[x][y].item->Shorthand(); //Use item for room contents.
@@ -551,6 +551,8 @@ public:
 	}
 	void Run() //Where the magic happens.
 	{
+		cout << "#################\n## SPELLFINDER ##\n#################\n\n";
+		cout << "As you enter the dungeon, you look back.\nBehind you, where the entrance used to be, is a solid wall.\nThere has to be a way out somehow.\nPress enter to begin...\n"; getchar();
 		String input;
 		do
 		{
