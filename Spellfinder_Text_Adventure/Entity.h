@@ -25,6 +25,12 @@ class Player : public Entity //Uses x, y, and health same as revenants.
 private:
 	vector<Spell*> spells;
 	vector<Item*> items;
+	struct { //Compares 2 item's names alphabetically (so that the binary search has a sorted list to work with).
+		bool operator()(const Item* a, const Item* b) const
+		{
+			return (a->Name() < b->Name());
+		}
+	} Compare;
 	int BinarySearch(vector<Item*>& _vector, String _name) { //Binary search the item vector according to length of names.
 		if (!_vector.empty()) //If the vector has contents.
 		{
@@ -105,12 +111,6 @@ public:
 			if (items[i] == _item) { items.erase(items.begin() + i); break; }
 		}
 	}
-	struct { //Compares 2 item's names alphabetically (so that the binary search has a sorted list to work with).
-		bool operator()(const Item* a, const Item* b) const
-		{
-			return (a->Name() < b->Name());
-		}
-	} Compare;
 	String Inventory() //Returns a complete vector of items and spells.
 	{
 		String s = String("ITEMS:\n"); //List items.
