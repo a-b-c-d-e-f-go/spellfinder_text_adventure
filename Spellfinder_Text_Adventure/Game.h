@@ -359,9 +359,9 @@ private:
 				{
 					gamestate = 1; //Win the game.
 				}
-				ef(player->x == 3 && player->y == 1) //If the player is in the vortex room.
+				ef(player->x == 1 && player->y == 0) //If the player is in the statue room.
 				{
-					output += String("\nThe desk is now activated???????\n");
+					output += String("\nThe statues don't do anything... ");
 				}
 				ef(player->x == 2 && player->y == 1) //If the player is in the garden room.
 				{
