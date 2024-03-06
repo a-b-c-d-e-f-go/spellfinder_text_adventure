@@ -36,19 +36,19 @@ public:
 		{
 			_output += String("\nAttacked for ");
 			_output += String(to_string(Damage()));
-			_output += String(" damage.");
+			_output += String(" damage. ");
 		}
 		if (Self_Damage() > 0)
 		{
 			_output += String("\nDealt ");
 			_output += String(to_string(Self_Damage()));
-			_output += String(" damage to yourself.");
+			_output += String(" damage to yourself. ");
 		}
 		else if (Self_Damage() < 0)
 		{
 			_output += String("\nHealed ");
 			_output += String(to_string(Self_Damage() * -1));
-			_output += String(" health.");
+			_output += String(" health. ");
 		}
 	}
 	virtual usi UniqueEffect() //When used.
@@ -86,7 +86,7 @@ public:
 	{
 		return 7;
 	}
-	Spear()
+	Spear() //Constructor.
 	{
 
 	}
@@ -119,7 +119,7 @@ public:
 	{
 		return -20;
 	}
-	Glowfruit()
+	Glowfruit() //Constructor.
 	{
 
 	}
@@ -156,7 +156,7 @@ public:
 	{
 		return 15;
 	}
-	Bomb()
+	Bomb() //Constructor.
 	{
 
 	}
@@ -189,17 +189,6 @@ public:
 	{
 		return self_damage;
 	}
-	Spell()
-	{
-
-	}
-	Spell(String _name, String _desc, int _damage = 0, int _self_damage = 0)
-	{
-		name = _name;
-		desc = _desc;
-		damage = _damage;
-		self_damage = _self_damage;
-	}
 	String Name() const //For sorting & finding.
 	{
 		return name;
@@ -217,6 +206,17 @@ public:
 	String Shorthand() const override //When drawing the map.
 	{
 		return String("SPL");
+	}
+	Spell() //Empty onstructor.
+	{
+
+	}
+	Spell(String _name, String _desc, int _damage = 0, int _self_damage = 0) //Constructor.
+	{
+		name = _name;
+		desc = _desc;
+		damage = _damage;
+		self_damage = _self_damage;
 	}
 };
 class Scroll : public Item
@@ -257,15 +257,15 @@ public:
 		s.Append(".");
 		return s; //Eg. Obtained the spark scroll.
 	}
-	Scroll()
+	Scroll() //Empty constructor.
 	{
 		
 	}
-	Scroll(Spell* _spell)
+	Scroll(Spell* _spell) //Constructor.
 	{
 		spell = _spell;
 	}
-	~Scroll()
+	~Scroll() //Destructor.
 	{
 		delete spell;
 		spell = nullptr;

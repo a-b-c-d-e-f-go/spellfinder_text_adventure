@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿// Game.h : This file contains the Game class, which controls the map as well as all room/position-dependent interactions.
+#pragma once
 #include <iostream>
 #include "String.h"
 #include "Room.h"
@@ -81,7 +82,7 @@ private:
 	};
 	Player* player;
 	vector<Revenant> revenants = { };
-	String output = prompt;
+	String output = prompt; //Gets written to the console below the map.
 
 	//Drawing
 	const String Side_Contents(const usi y) const
@@ -340,6 +341,10 @@ private:
 				{
 					gamestate = 1; //Win the game.
 				}
+				else
+				{
+					output += String("\nNothing happened... ");
+				}
 			default:
 				break;
 		}
@@ -561,9 +566,9 @@ public:
 		} while (input != String("quit") && gamestate == 0); //End program after inputting "quit".
 		switch (gamestate) //End message based on what happened.
 		{
-			case -1: cout << "YOU DIED!"; break;
-			case 0: cout << "Quitting game..."; break;
-			case 1: cout << "YOU WIN!"; break;
+			case -1: cout << "\nYOU DIED!"; break;
+			case 0: cout << "\nQuitting game..."; break;
+			case 1: cout << "\nThe portal opens...\nYOU WIN!"; break;
 		}
 	}
 };

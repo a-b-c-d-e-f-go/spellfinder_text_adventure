@@ -1,3 +1,4 @@
+// Room.h : This file contains the Room class, which can store a description and an item.
 #pragma once
 #include <iostream>
 #include "String.h"
@@ -13,10 +14,10 @@ private:
 	String description = String();
 public:
 	Item* item = nullptr;
-	Room()
+	Room() //Empty onstructor.
 	{
 	}
-	Room(String& _desc, Item* _item = nullptr)
+	Room(String& _desc, Item* _item = nullptr) //Constructor.
 	{
 		description = _desc;
 		item = _item;
@@ -26,12 +27,12 @@ public:
 		description = String(_desc); //Convert char array to custom string.
 		item = _item;
 	}
-	~Room()
+	~Room() //Destructor.
 	{
 		delete item;
 		item = nullptr;
 	}
-	String Description() const
+	String Description() const //Externally read-only.
 	{
 		return description;
 	}

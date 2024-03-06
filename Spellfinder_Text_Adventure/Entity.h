@@ -1,3 +1,4 @@
+// Entity.h : This file contains the Entity class and all its subclasses.
 #pragma once
 #include <iostream>
 #include <vector>
@@ -19,7 +20,7 @@ public:
 	short int health = 20;
 };
 
-class Player : public Entity //Different layer, but still uses x and y.
+class Player : public Entity //Uses x, y, and health same as revenants.
 {
 private:
 	vector<Spell*> spells;
@@ -50,41 +51,19 @@ private:
 		return -1;
 	}
 	int BinarySearch_S(vector<Spell*>& _vector, String _name) { //Version for spells. Not familiar enough with templates yet, and there is only 1 different version needed.
-		if (!_vector.empty()) //If the vector has contents.
-		{
-			int _low = 0;
-			int _high = _vector.size() - 1; //Because vectors start at 0, the max is 1 less than the size.
-			while (_low <= _high)
-			{
-				int _mid = _low + (_high - _low) / 2; //Set midpoint between low and high.
-				//Compare mid to name, partitioning based on if it is higher or lower alphabetically.
-				if (_name == _vector[_mid]->Name()) {
-					return _mid;
-				}
-
-				if (_name > _vector[_mid]->Name()) {
-					_low = _mid + 1;
-				}
-
-				if (_name < _vector[_mid]->Name()) {
-					_high = _mid - 1;
-				}
-			}
-
-		}
-		return -1;
+		return BinarySearch((vector<Item*>&)_vector, _name); //The easy way.
 	}
 public:
-	Player()
+	Player() //Empty constructor.
 	{
 
 	}
-	Player(usi _x, usi _y)
+	Player(usi _x, usi _y) //Constructor.
 	{
 		x = _x;
 		y = _y;
 	}
-	~Player()
+	~Player() //Destructor.
 	{
 		while (!items.empty()) //Continuously delete and remove item pointers until empty.
 		{
@@ -119,14 +98,14 @@ public:
 		spells.push_back(_spell); //Add spell to spells.
 		std::sort(spells.begin(), spells.end(), Compare); //Sort the vector after adding this new item. Spells must be in alphabetical order for binary search.
 	}
-	void RemoveItem(Item* _item) //For consumables.
+	void RemoveItem(Item* _item) //For consumables. No need for a spell version. Once you know a spell, you know a spell.
 	{
 		loop(i, 0, items.size()) //Loops until finding the item. Then breaks the loop.
 		{
 			if (items[i] == _item) { items.erase(items.begin() + i); break; }
 		}
 	}
-	struct { //Compares 2 item's names alphabetically (for binary search).
+	struct { //Compares 2 item's names alphabetically (so that the binary search has a sorted list to work with).
 		bool operator()(const Item* a, const Item* b) const
 		{
 			return (a->Name() < b->Name());
@@ -153,16 +132,16 @@ class Revenant : public Entity
 {
 public:
 	bool just_spawned = true; //If the revenant has been spawned this turn.
-	Revenant()
+	Revenant() //Empty constructor.
 	{
 
 	}
-	Revenant(usi _x, usi _y)
+	Revenant(usi _x, usi _y) //Constructor.
 	{
 		x = _x;
 		y = _y;
 	}
-	~Revenant()
+	~Revenant() //Destructor.
 	{
 
 	}
