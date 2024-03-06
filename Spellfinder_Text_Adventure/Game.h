@@ -373,7 +373,12 @@ private:
 				}
 				ef(player->x == 1 && player->y == 3) //If the player is in the pasta room.
 				{
-					output += String("\nSomething seems to take notice. You should leave.\n");
+					output += String("\nSomething seems to take notice. You should leave...?\n");
+				}
+				ef(player->x == 3 && player->y == 3) //If the player is at the bottomless pit.
+				{
+					output += String("\nYou found out what the bottomless pit does.\nA revenant emerges... ");
+					newrev(3, 3);
 				}
 				ef (player->x == 1 && player->y == 1) //If the player is in the pillars room.
 				{
