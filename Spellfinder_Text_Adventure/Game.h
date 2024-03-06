@@ -355,9 +355,25 @@ private:
 				newrev(0, 0); //Spawn 1 revenant at 0,0.
 				break;
 			case 3: //Activate.
-				if (player->x == 2 && player->y == 0) //If the player is at the portal's position.
+				if (player->x == 2 && player->y == 0) //If the player is in the portal room.
 				{
 					gamestate = 1; //Win the game.
+				}
+				ef(player->x == 3 && player->y == 1) //If the player is in the vortex room.
+				{
+					output += String("\nThe desk is now activated???????\n");
+				}
+				ef(player->x == 2 && player->y == 1) //If the player is in the garden room.
+				{
+					output += String("\nThe plants are now activated???????\n");
+				}
+				ef (player->x == 0 && player->y == 0) //If the player is in the start room.
+				{
+					output += String("\nThe solid wall remains solid. Seems like this isn't the way out.\n");
+				}
+				ef(player->x == 1 && player->y == 3) //If the player is in the pasta room.
+				{
+					output += String("\nSomething seems to take notice. You should leave.\n");
 				}
 				ef (player->x == 1 && player->y == 1) //If the player is in the pillars room.
 				{
