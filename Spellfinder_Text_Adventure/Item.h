@@ -61,6 +61,7 @@ public:
 	}
 	
 };
+
 class Spear : public Item
 {
 public:
@@ -177,6 +178,7 @@ public:
 	usi UniqueEffect() override //When used.
 	{
 		if (Name() == String("vortex")) { return 1; } //Summons a revenant at 1,3.
+		if (Name() == String("activate")) { return 3; } //Wins the game if at 2,0.
 		return 0;
 	}
 	int Damage() override //Damage to anything else in the room.

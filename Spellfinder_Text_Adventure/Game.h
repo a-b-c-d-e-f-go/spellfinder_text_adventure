@@ -48,7 +48,7 @@ private:
 			//1,1: PILLARS
 			Room("You enter a room with 4 stone pillars at each corner."),
 			//1,2: DISCHARGE
-			Room("You enter a room with a scorched floor covered in burnt scrolls.", new Scroll(new Spell(String("discharge"), String("Creates an explosion at your position,\ndamaging everything nearby and (to a lesser extent) yourself."), 10, 4))),
+			Room("You enter a room with a scorched floor covered in burnt scrolls.", new Scroll(new Spell(String("discharge"), String("Creates an explosion at your position,\ndamaging everything nearby and (to a lesser extent) yourself."), 12, 4))),
 			//1,3: PASTA
 			Room("You enter room with no distinguishing features.")
 		},
@@ -58,7 +58,7 @@ private:
 			//2,1: GARDEN
 			Room("You enter a small garden filled with luminescent flora.", new Glowfruit()),
 			//2,2: HEAL
-			Room("You enter a room with diagonal tiles and an obsidian pedestal at its center.", new Scroll(new Spell(String("heal"), String("Quickly mends most non-lethal wounds."), 0, -10))),
+			Room("You enter a room with diagonal tiles and an obsidian pedestal at its center.", new Scroll(new Spell(String("heal"), String("Quickly mends most non-lethal wounds."), 0, -12))),
 			//2,3: WEST REVENANT EXIT
 			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be operating tables.")
 		},
@@ -199,6 +199,7 @@ private:
 	{
 		if (revenants.size() > 0) //If there are any remaining revenants.
 		{
+			usi attacks = 0;
 			output += String("The revenants take their turn.\n");
 
 			loop(i, 0, revenants.size()) //For each revenant that exists.
@@ -211,7 +212,7 @@ private:
 				{
 					if ((revenants[i].x == player->x) && (revenants[i].y == player->y)) //At player's position. Attempt to attack.
 					{
-
+						attacks++;
 					}
 					else //Not at player's position. Attempt to close in.
 					{
@@ -242,6 +243,19 @@ private:
 					}
 				}
 			}
+			if (attacks > 0) //Process revenant attacks based on how many were in the same room as a player.
+			{
+				if (attacks == 1)
+				{
+					output += String("A revenant attacks for 3 damage.\n");
+				}
+				else
+				{
+					output += String(attacks).Append(String(" revenants attack for ").Append(attacks * 3).Append(String(" damage.\n")));
+				}
+				player->health -= (3 * attacks); //Damage the player.
+			}
+			
 		}
 		Update_Revenant_Count(); //Should update after they move.
 	}
@@ -308,7 +322,6 @@ private:
 		player->health -= item->Self_Damage();
 		Damage_Revenants(item->Damage());
 		if (player->health > 20) { player->health = 20; } //Prevent overheal.
-		if (player->health < 0) { gamestate = -1; } //Player dies at 0 health.
 		Scroll* s = ((Scroll*)item); //Used by case 2.
 		switch (item->UniqueEffect())
 		{
@@ -322,6 +335,11 @@ private:
 				if (s != nullptr) { player->AddSpell(s->spell); } //Add spell from scroll.
 				newrev(0, 0); //Spawn 1 revenant at 0,0.
 				break;
+			case 3: //Activate.
+				if (player->x == 2 && player->y == 0) //If the player is at the portal's position.
+				{
+					gamestate = 1; //Win the game.
+				}
 			default:
 				break;
 		}
@@ -497,9 +515,9 @@ public:
 		player = new Player(0, 0); //Add player.
 		player->AddSpell(new Spell(String("spark"), String("Shoots out a short-ranged spark of energy."), 5, 0)); //Starter attack.
 		//Add revenants.
-		loop(i, 0, 3)
+		loop(i, 0, 2)
 		{
-			//newrev(3, 3);
+			newrev(3, 3);
 		}
 		/*loop(i, 0, 4) Death
 		{
@@ -533,9 +551,13 @@ public:
 		{
 			Update_Revenant_Count(); //Do this before drawing the map.
 			system("cls"); Draw_Map(); output.WriteToConsole(); cout << endl; //Refresh every turn.
-			input = String::ReadFromConsole(); //Waits for input from console.
-			input.ToLower(); //Case insensitive.
-			Execute(input); //Performs whatever command was input.
+			if (player->health <= 0) { gamestate = -1; } //Player dies at 0 health.
+			if (gamestate != -1)
+			{
+				input = String::ReadFromConsole(); //Waits for input from console.
+				input.ToLower(); //Case insensitive.
+				Execute(input); //Performs whatever command was input.
+			}
 		} while (input != String("quit") && gamestate == 0); //End program after inputting "quit".
 		switch (gamestate) //End message based on what happened.
 		{
