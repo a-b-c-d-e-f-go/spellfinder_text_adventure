@@ -196,7 +196,7 @@ private:
 		rev.y += _y;
 		rev_count[rev.x][rev.y] += 1; //Increase revenant count where the revenant moved to.
 	}
-	const void Revenants_Turn() //Happens when you wait, move, cast a spell, or use an item.
+	const void Revenants_Turn() //Happens when you wait, move, cast a spell, or use an item. It's here because otherwise the revenant class needs access to the rooms array.
 	{
 		if (revenants.size() > 0) //If there are any remaining revenants.
 		{
@@ -260,7 +260,7 @@ private:
 		}
 		Update_Revenant_Count(); //Should update after they move.
 	}
-	const void Damage_Revenants(int damage) //Damages any revenants in the same room as the player by a given amount.
+	const void Damage_Revenants(int damage) //Damages any revenants in the same room as the player by a given amount, automatically killing them at 0 health.
 	{
 		if (damage > 0) //If it has zero damage, it's not an attack, and shouldn't be treated as missed.
 		{
@@ -315,7 +315,7 @@ private:
 			rooms[player->x][player->y].item = nullptr; //Remove item from room.
 		}
 	}
-	const void Use_Item(Item* item)
+	const void Use_Item(Item* item) //All of the things that happen when you use an item or spell, depending on the item or spell.
 	{
 		item->Use(output); //Use item
 
