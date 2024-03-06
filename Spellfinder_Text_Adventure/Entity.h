@@ -152,6 +152,7 @@ public:
 class Revenant : public Entity
 {
 public:
+	bool just_spawned = true; //If the revenant has been spawned this turn.
 	Revenant()
 	{
 

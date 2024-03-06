@@ -171,7 +171,7 @@ private:
 public:
 	void Use(String& _output) override //When used.
 	{
-		_output = String("You cast ").Append(name).Append(String("."));
+		_output = String("You cast ").Append(name).Append(String(". "));
 		Item::Use(_output);
 	}
 	usi UniqueEffect() override //When used.
@@ -206,6 +206,10 @@ public:
 	{
 		String s = desc;
 		s += String("\n\nCAST:\n");
+		if (name == String("activate"))
+		{
+			s += String("Activates a portal, if there is one in this room.\n");
+		}
 		return s;
 	}
 	String Shorthand() const override //When drawing the map.
@@ -240,7 +244,7 @@ public:
 	String Description() const override //When inspected.
 	{
 		String s = String("Parchment with enigmatic symbols written all over.\nIt will take time to copy this over to your spellbook,\nand doing so may bring more revenants.\n\nUSE:\nAdds the spell '");
-		s.Append(spell->Name()).Append("' to your spellbook.\n");
+		s.Append(spell->Name()).Append("' to your spellbook.\nSpawns a revenant in room (0,0).\n");
 		return s;
 	}
 	String RoomDescription() const override //When found in a room.
@@ -265,4 +269,3 @@ public:
 		spell = nullptr;
 	}
 };
-

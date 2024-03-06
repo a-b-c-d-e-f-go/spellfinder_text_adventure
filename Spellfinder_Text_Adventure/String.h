@@ -181,11 +181,11 @@ public: //External Functions
     }
 
 public: //External Operators
-    bool operator==(const String& _other) //Returns true if lhs == rhs.
+    bool operator==(const String& _other) const //Returns true if lhs == rhs.
     {
         return EqualTo(_other); //Equal.
     }
-    bool operator!=(const String& _other) //Returns true if lhs != rhs.
+    bool operator!=(const String& _other) const //Returns true if lhs != rhs.
     {
         return !(EqualTo(_other)); //Not equal.
     }

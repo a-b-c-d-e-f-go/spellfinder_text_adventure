@@ -9,7 +9,7 @@
 #define loop(var, min, max) for (usi var = min; var < max; var++)
 using namespace std;
 
-#define m(s) cout << s << endl //Write to map. Used in Run().
+#define m(s, y) cout << s << Side_Contents(y).CStr() << endl //Write to map. Used in Run().
 #define cg << "             " << //Gap between players/items in each room. Used in Row_Contents().
 #define eg << "   ##   ##   " << //Gap between enemies in each room. Used in Row_Contents().
 #define prompt String("Enter a command to proceed. 'help' will list all commands.") //Default output before a command is entered.
@@ -18,7 +18,7 @@ const usi map_size = 4;
 const char R_CLOSED[] =	"#############   #############   #############   #############"; //Top and bottom of the map.
 const char R_OPEN[] =	"#####   #####   #####   #####   #####   #####   #####   #####"; //Top and bottom of rooms (besides R_CLOSED for the top and bottom of the map).
 const char R_INSIDE[] =	"##         ##   ##         ##   ##         ##   ##         ##"; //Before and after a row of room's contents.
-
+const char R_GAP[] =	"                                                             "; //Between rooms.
 #define newrev(x, y) revenants.push_back(Revenant(x, y)) //Spawns in a revenant at the given coordinates.
 #define inspect_valid_item output = prompt; system("cls"); input.ToUpper().WriteToConsole(); cout << "\n---------------\n"; inspected->Description().WriteToConsole();//Clear console and write item details to console.
 #define valid_item_stats if (inspected->Damage() > 0) { cout << "Deals " << to_string(inspected->Damage()) << " damage to any revenants in the same room.\n"; } if (inspected->Self_Damage() > 0) { cout << "Deals " << to_string(inspected->Self_Damage()) << " damage to yourself.\n"; } if (inspected->Self_Damage() < 0) { cout << "Heals you for " << to_string(inspected->Self_Damage() * -1) << " health.\n"; } //Shown below USE:
@@ -26,6 +26,7 @@ const char R_INSIDE[] =	"##         ##   ##         ##   ##         ##   ##     
 class Game
 {
 private:
+	short int gamestate = 0; //0 for mid-game, -1 for failure, 1 for success.
 	const void wait_for_enter() const
 	{
 		cout << "\nPress enter to return.\n"; getchar(); //Wait for enter key.
@@ -65,11 +66,11 @@ private:
 			//3,0: INDEX (Top Right)
 			Room("You enter a room with bookshelves adorning the northern and eastern walls."),
 			//3,1: RIFT BOLT
-			Room("You enter a room furnished with a wooden desk, drawer, and chair.\nPaper notes written in incomprehensible symbols are strewn across the floor.", new Scroll(new Spell(String("vortex"), String("Uses a fracture in spacetime to deal immense damage.\nUnfortunately, it also summons a revenant elsewhere."), 20, 2))),
+			Room("You enter a room furnished with a wooden desk, drawer, and chair.\nPaper notes written in incomprehensible symbols are strewn across the floor.", new Scroll(new Spell(String("vortex"), String("Uses a fracture in spacetime to deal immense damage.\nUnfortunately, it also summons more revenants elsewhere."), 999, -3))),
 			//3,2: NORTH REVENANT EXIT
 			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be lockers on the eastern wall."),
 			//3,3: BOTTOMLESS PIT (Bottom Right)
-			Room("The fog dissapates as you enter what can only be described as a bottomless pit.")
+			Room("The fog dissapates as you enter what can only be described as a bottomless pit.\nIt looks like there's something emerging from it.", new Scroll(new Spell(String("activate"), String("Designed as a key for some form of portal."), 0, 0)))
 		},
 	};
 	usi rev_count[map_size][map_size] = { //For the purposes of revenant AI and the map display.
@@ -83,11 +84,45 @@ private:
 	String output = prompt;
 
 	//Drawing
+	const String Side_Contents(const usi y) const
+	{
+		String s = "\t";
+		if (y == 1)
+		{
+			s += String("Your Health: ");
+			s += String(player->health);
+			s += String("/20");
+		}
+
+		if (y > 2 && y <= 2 + rev_count[player->x][player->y]) //From 3 to 3+count.
+		{
+			s += String("Revenant: ");
+			usi j = y - 2; //3 is the start.
+			loop(i, 0, revenants.size())
+			{
+				if ((revenants[i].x == player->x) && (revenants[i].y == player->y))
+				{
+					j--;
+					if (j <= 0)
+					{
+						s += String(revenants[i].health);
+						break;
+					}
+				}
+			}
+			s += String("/20");
+		}
+		//if (y == 1) { s += String("Your Health: "); }
+		//return String("test").Append(String(to_string(y)));
+		return s;
+	}
 	const void Row_Contents(const usi r) const //Draws a row within the map that contains players and such.
 	{
-		m("##   " << Enem(0, r) eg Enem(1, r) eg Enem(2, r) eg Enem(3, r) << "   ##"); //Enemy layer.
-		m("##   " << Cont(0, r).CStr() cg Cont(1, r).CStr() cg Cont(2, r).CStr() cg Cont(3, r).CStr() << "   ##"); //Player/item layer.
-		m(R_INSIDE);
+		//Enemy layer.
+		m("##   " << Enem(0, r) eg Enem(1, r) eg Enem(2, r) eg Enem(3, r) << "   ##", r * 6 + 1);
+		//Player/item layer.
+		m("##   " << Cont(0, r).CStr() cg Cont(1, r).CStr() cg Cont(2, r).CStr() cg Cont(3, r).CStr() << "   ##", r * 6 + 2);
+		m(R_INSIDE, r * 6 + 3);
 	}
 	const char* Enem(usi x, usi y) const //Room enemy.
 	{
@@ -117,21 +152,25 @@ private:
 	}
 	const void Draw_Map() const //Draws the entire map.
 	{
-		m(R_CLOSED); //Row 0
+		m(R_CLOSED, 0); //Row 0
 		Row_Contents(0);
-		m(R_OPEN << endl);
+		m(R_OPEN, 4);
+		m(R_GAP, 5);
 
-		m(R_OPEN); //Row 1
+		m(R_OPEN, 6); //Row 1
 		Row_Contents(1);
-		m(R_OPEN << endl);
+		m(R_OPEN, 10);
+		m(R_GAP, 11);
 
-		m(R_OPEN); //Row 2
+		m(R_OPEN, 12); //Row 2
 		Row_Contents(2);
-		m(R_OPEN << endl);
+		m(R_OPEN, 16);
+		m(R_GAP, 17);
 
-		m(R_OPEN); //Row 3
+		m(R_OPEN, 18); //Row 3
 		Row_Contents(3);
-		m(R_CLOSED << endl);
+		m(R_CLOSED, 22);
+		cout << endl;
 	}
 
 	//Revenants
@@ -164,36 +203,43 @@ private:
 
 			loop(i, 0, revenants.size()) //For each revenant that exists.
 			{
-				if (revenants[i].x == player->x && revenants[i].y == player->y) //At player's position. Attempt to attack.
+				if (revenants[i].just_spawned) //On the revenants first turn after being spawned.
 				{
-
+					revenants[i].just_spawned = false; //Disable this flag to allow actions next turn. Otherwise do nothing.
 				}
-				else //Not at player's position. Attempt to close in.
+				else //If the revenant has already been spawned.
 				{
-					int weight_n = 0; int weight_s = 0; int weight_e = 0; int weight_w = 0; //Weights for different directions.
-
-					//Affect weights based on X/Y difference to player. The further away on an axis, the more it is favoured.
-					weight_n += (revenants[i].y - player->y); weight_s -= (revenants[i].y - player->y);
-					weight_e -= (revenants[i].x - player->x); weight_w += (revenants[i].x - player->x);
-
-					//If the distance to the player is further than 1 room.
-					if (abs(weight_n) > 1 || abs(weight_s) > 1 || abs(weight_e) > 1 || abs(weight_w) > 1)
+					if ((revenants[i].x == player->x) && (revenants[i].y == player->y)) //At player's position. Attempt to attack.
 					{
-						//Affect weights based on if there are other revenants occupying that direction, encouraging the revenants to spread out when distant from the player.
-						weight_n -= rev_count[revenants[i].x][revenants[i].y - 1] * 2;
-						weight_s -= rev_count[revenants[i].x][revenants[i].y + 1] * 2;
-						weight_e -= rev_count[revenants[i].x + 1][revenants[i].y] * 2;
-						weight_w -= rev_count[revenants[i].x - 1][revenants[i].y] * 2;
-					}
-					//Prevent revenants from pathfinding outside the map.
-					if ((revenants[i].x + 1) >= map_size) { weight_e = -999; } if ((revenants[i].x - 1) < 0) { weight_w = -999; }
-					if ((revenants[i].y + 1) >= map_size) { weight_s = -999; } if ((revenants[i].y - 1) < 0) { weight_n = -999; }
 
-					//Choose a direction to move in based on the highest weight.
-					if (weight_n >= weight_s && weight_n >= weight_e && weight_n >= weight_w) { Move_Revenant(revenants[i], 0, -1); } //If weight_n is at least tied for highest.
-					ef (weight_s >= weight_n && weight_s >= weight_e && weight_s >= weight_w) { Move_Revenant(revenants[i], 0, 1); } //If weight_s is at least tied for highest.
-					ef (weight_e >= weight_n && weight_e >= weight_s && weight_e >= weight_w) { Move_Revenant(revenants[i], 1, 0); } //If weight_e is at least tied for highest.
-					ef (weight_w >= weight_n && weight_w >= weight_s && weight_w >= weight_e) { Move_Revenant(revenants[i], -1, 0); } //If weight_w is at least tied for highest.
+					}
+					else //Not at player's position. Attempt to close in.
+					{
+						int weight_n = 0; int weight_s = 0; int weight_e = 0; int weight_w = 0; //Weights for different directions.
+
+						//Affect weights based on X/Y difference to player. The further away on an axis, the more it is favoured.
+						weight_n += (revenants[i].y - player->y); weight_s -= (revenants[i].y - player->y);
+						weight_e -= (revenants[i].x - player->x); weight_w += (revenants[i].x - player->x);
+
+						//If the distance to the player is further than 1 room.
+						if (abs(weight_n) > 1 || abs(weight_s) > 1 || abs(weight_e) > 1 || abs(weight_w) > 1)
+						{
+							//Affect weights based on if there are other revenants occupying that direction, encouraging the revenants to spread out when distant from the player.
+							weight_n -= rev_count[revenants[i].x][revenants[i].y - 1] * 2;
+							weight_s -= rev_count[revenants[i].x][revenants[i].y + 1] * 2;
+							weight_e -= rev_count[revenants[i].x + 1][revenants[i].y] * 2;
+							weight_w -= rev_count[revenants[i].x - 1][revenants[i].y] * 2;
+						}
+						//Prevent revenants from pathfinding outside the map.
+						if ((revenants[i].x + 1) >= map_size) { weight_e = -999; } if ((revenants[i].x - 1) < 0) { weight_w = -999; }
+						if ((revenants[i].y + 1) >= map_size) { weight_s = -999; } if ((revenants[i].y - 1) < 0) { weight_n = -999; }
+
+						//Choose a direction to move in based on the highest weight.
+						if (weight_n >= weight_s && weight_n >= weight_e && weight_n >= weight_w) { Move_Revenant(revenants[i], 0, -1); } //If weight_n is at least tied for highest.
+						ef(weight_s >= weight_n && weight_s >= weight_e && weight_s >= weight_w) { Move_Revenant(revenants[i], 0, 1); } //If weight_s is at least tied for highest.
+						ef(weight_e >= weight_n && weight_e >= weight_s && weight_e >= weight_w) { Move_Revenant(revenants[i], 1, 0); } //If weight_e is at least tied for highest.
+						ef(weight_w >= weight_n && weight_w >= weight_s && weight_w >= weight_e) { Move_Revenant(revenants[i], -1, 0); } //If weight_w is at least tied for highest.
+					}
 				}
 			}
 		}
@@ -216,7 +262,8 @@ private:
 						if (revenants[i].health <= 0)
 						{
 							kills++;
-							revenants.erase(revenants.begin() + i);
+							revenants.erase(revenants.begin() + i); //Remove revenant.
+							i--; //Move i to the previous revenant to avoid skipping one after deletion.
 						}
 					}
 				}
@@ -260,11 +307,16 @@ private:
 		//Damage & self damage of item.
 		player->health -= item->Self_Damage();
 		Damage_Revenants(item->Damage());
+		if (player->health > 20) { player->health = 20; } //Prevent overheal.
+		if (player->health < 0) { gamestate = -1; } //Player dies at 0 health.
 		Scroll* s = ((Scroll*)item); //Used by case 2.
 		switch (item->UniqueEffect())
 		{
 			case 1: //Vortex.
-				newrev(1, 3); //Summon a new revenant at the PASTA room.
+				loop(i, 0, 3) //Spawn 3 revenants at the PASTA room
+				{
+					newrev(1, 3);
+				}
 				break;
 			case 2: //Spell scroll.
 				if (s != nullptr) { player->AddSpell(s->spell); } //Add spell from scroll.
@@ -447,7 +499,7 @@ public:
 		//Add revenants.
 		loop(i, 0, 3)
 		{
-			newrev(3, 3);
+			//newrev(3, 3);
 		}
 		/*loop(i, 0, 4) Death
 		{
@@ -484,6 +536,12 @@ public:
 			input = String::ReadFromConsole(); //Waits for input from console.
 			input.ToLower(); //Case insensitive.
 			Execute(input); //Performs whatever command was input.
-		} while (input != String("quit")); //End program after inputting "quit".
+		} while (input != String("quit") && gamestate == 0); //End program after inputting "quit".
+		switch (gamestate) //End message based on what happened.
+		{
+			case -1: cout << "YOU DIED!"; break;
+			case 0: cout << "Quitting game..."; break;
+			case 1: cout << "YOU WIN!"; break;
+		}
 	}
 };
