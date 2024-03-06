@@ -119,10 +119,17 @@ public:
 		spells.push_back(_spell); //Add spell to spells.
 		std::sort(spells.begin(), spells.end(), Compare); //Sort the vector after adding this new item. Spells must be in alphabetical order for binary search.
 	}
+	void RemoveItem(Item* _item) //For consumables.
+	{
+		loop(i, 0, items.size()) //Loops until finding the item. Then breaks the loop.
+		{
+			if (items[i] == _item) { items.erase(items.begin() + i); break; }
+		}
+	}
 	struct { //Compares 2 item's names alphabetically (for binary search).
 		bool operator()(const Item* a, const Item* b) const
 		{
-			return a->Name() < b->Name();
+			return (a->Name() < b->Name());
 		}
 	} Compare;
 	String Inventory() //Returns a complete vector of items and spells.

@@ -47,17 +47,17 @@ private:
 			//1,1: PILLARS
 			Room("You enter a room with 4 stone pillars at each corner."),
 			//1,2: DISCHARGE
-			Room("You enter a room with a scorched floor covered in burnt scrolls.", new Scroll(new Spell(String("discharge"), String("Creates an explosion at your position, damaging everything nearby and (to a lesser extent) yourself."), 10, 4))),
+			Room("You enter a room with a scorched floor covered in burnt scrolls.", new Scroll(new Spell(String("discharge"), String("Creates an explosion at your position,\ndamaging everything nearby and (to a lesser extent) yourself."), 10, 4))),
 			//1,3: PASTA
 			Room("You enter room with no distinguishing features.")
 		},
 		{
 			//2,0: PORTAL
-			Room("You enter a room with an empty staircase leading north up towards an empty tungsten frame about the size of a doorway."),
+			Room("You enter a room with an empty staircase leading north,\nup towards an empty tungsten frame about the size of a doorway."),
 			//2,1: GARDEN
 			Room("You enter a small garden filled with luminescent flora.", new Glowfruit()),
 			//2,2: HEAL
-			Room("You enter a room with diagonal tiles and an obsidian pedestal at its center.", new Scroll(new Spell(String("heal"), String(""), 0, -10))),
+			Room("You enter a room with diagonal tiles and an obsidian pedestal at its center.", new Scroll(new Spell(String("heal"), String("Quickly mends most non-lethal wounds."), 0, -10))),
 			//2,3: WEST REVENANT EXIT
 			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be operating tables.")
 		},
@@ -65,7 +65,7 @@ private:
 			//3,0: INDEX (Top Right)
 			Room("You enter a room with bookshelves adorning the northern and eastern walls."),
 			//3,1: RIFT BOLT
-			Room("You enter a room furnished with a wooden desk, drawer, and chair.\nPaper notes written in incomprehensible symbols are strewn across the floor.", new Scroll(new Spell(String("rift bolt"), String("Uses a fracture in spacetime to deal immense damage.\nUnfortunately, it also summons a revenant elsewhere."), 20, 0))),
+			Room("You enter a room furnished with a wooden desk, drawer, and chair.\nPaper notes written in incomprehensible symbols are strewn across the floor.", new Scroll(new Spell(String("vortex"), String("Uses a fracture in spacetime to deal immense damage.\nUnfortunately, it also summons a revenant elsewhere."), 20, 2))),
 			//3,2: NORTH REVENANT EXIT
 			Room("As you enter, a thick gray fog permeates your vision.\nAdjusting your eyes, you notice what appear to be lockers on the eastern wall."),
 			//3,3: BOTTOMLESS PIT (Bottom Right)
@@ -134,16 +134,7 @@ private:
 		m(R_CLOSED << endl);
 	}
 
-
-	bool Check_Command(String& input, const String command) //If the input starts with this command, return true and set the input to just the parameter of the command.
-	{
-		if (input.Find(command) == 0) //Checks for a command.
-		{
-			input.Replace(command + " ", ""); //Remove command and space, leaving only the parameter. Eg. 'move south' becomes 'south'.
-			return true;
-		}
-		return false; //Return false, checking for the next command.
-	}
+	//Revenants
 	const void Update_Revenant_Count()
 	{
 		loop(i, 0, map_size) //Loop through rev_count and reset it.
@@ -158,7 +149,6 @@ private:
 			rev_count[revenants[i].x][revenants[i].y]++; //Increase counter at its coordinates.
 		}
 	}
-
 	const void Move_Revenant(Revenant& rev, short int _x, short int _y) //Move a revenant and update its position to other revenants.
 	{
 		rev_count[rev.x][rev.y] -= 1; //Decrease revenant count where the revenant moved from.
@@ -166,7 +156,6 @@ private:
 		rev.y += _y;
 		rev_count[rev.x][rev.y] += 1; //Increase revenant count where the revenant moved to.
 	}
-
 	const void Revenants_Turn() //Happens when you wait, move, cast a spell, or use an item.
 	{
 		if (revenants.size() > 0) //If there are any remaining revenants.
@@ -210,18 +199,6 @@ private:
 		}
 		Update_Revenant_Count(); //Should update after they move.
 	}
-
-	const void Item_Check() //Waiting
-	{
-		if ((rev_count[player->x][player->y] <= 0) && (rooms[player->x][player->y].item != nullptr)) //If the room is clear and contains an item.
-		{
-			output += String("\n");
-			output += rooms[player->x][player->y].item->RoomDescription(); //Announce item pickup.
-			player->AddItem(rooms[player->x][player->y].item); //Give the item to the player.
-			rooms[player->x][player->y].item = nullptr; //Remove item from room.
-		}
-	}
-
 	const void Damage_Revenants(int damage) //Damages any revenants in the same room as the player by a given amount.
 	{
 		if (damage > 0) //If it has zero damage, it's not an attack, and shouldn't be treated as missed.
@@ -254,16 +231,65 @@ private:
 					output += String(" Killed ");
 					output += String(to_string(kills));
 					output += String(" revenant(s). ");
+					rev_count[player->x][player->y] -= kills; //Faster than doing a full revenant count.
 				}
 			}
 			else //If there are no revenants in the room.
 			{
 				output += String("\nMissed! ");
 			}
+			Item_Check(); //Check for items after attacking. This will only do anything if there are no revenants in the room.
 		}
 	}
 
-	//Effects
+	//Items
+	const void Item_Check() //Waiting, clearing a room, or moving into an empty room.
+	{
+		if ((rev_count[player->x][player->y] <= 0) && (rooms[player->x][player->y].item != nullptr)) //If the room is clear and contains an item.
+		{
+			output += String("\n");
+			output += rooms[player->x][player->y].item->RoomDescription(); //Announce item pickup.
+			player->AddItem(rooms[player->x][player->y].item); //Give the item to the player.
+			rooms[player->x][player->y].item = nullptr; //Remove item from room.
+		}
+	}
+	const void Use_Item(Item* item)
+	{
+		item->Use(output); //Use item
+
+		//Damage & self damage of item.
+		player->health -= item->Self_Damage();
+		Damage_Revenants(item->Damage());
+		Scroll* s = ((Scroll*)item); //Used by case 2.
+		switch (item->UniqueEffect())
+		{
+			case 1: //Vortex.
+				newrev(1, 3); //Summon a new revenant at the PASTA room.
+				break;
+			case 2: //Spell scroll.
+				if (s != nullptr) { player->AddSpell(s->spell); } //Add spell from scroll.
+				newrev(0, 0); //Spawn 1 revenant at 0,0.
+				break;
+			default:
+				break;
+		}
+		if (item->Consumable())
+		{
+			player->RemoveItem(item);
+			output += String("\nItem was consumed. ");
+		}
+	}
+
+	//Commands
+	bool Check_Command(String& input, const String command) //If the input starts with this command, return true and set the input to just the parameter of the command.
+	{
+		if (input.Find(command) == 0) //Checks for a command.
+		{
+			input.Replace(command + " ", ""); //Remove command and space, leaving only the parameter. Eg. 'move south' becomes 'south'.
+			return true;
+		}
+		return false; //Return false, checking for the next command.
+	}
 	const void Execute(String& input) //Do things based on the player's command.
 	{
 		if (Check_Command(input, String("wait"))) //wait - Does nothing, allowing the revenants to take their turn.
@@ -366,12 +392,7 @@ private:
 			}
 			else //Valid item. Attempt to use.
 			{
-				output = String("Using item ").Append(input).Append(String(".")); //Announce usage.
-				use->Use(output); //Use item.
-
-				//Damage & self damage of item.
-				player->health -= use->Self_Damage();
-				Damage_Revenants(use->Damage());
+				Use_Item(use);
 				Revenants_Turn(); //Since it's an action with effects (such as an attack), the revenants should act afterwards.
 			}
 		}
@@ -385,11 +406,7 @@ private:
 			else //Valid spell. Attempt to cast.
 			{
 				output = String("Casting spell ").Append(input).Append(String(".")); //Announce casting.
-				cast->Use(output); //Cast spell.
-
-				//Damage & self damage of spell.
-				player->health -= cast->Self_Damage();
-				Damage_Revenants(cast->Damage());
+				Use_Item((Item*)cast);
 				Revenants_Turn(); //Since it's an action with effects (such as an attack), the revenants should act afterwards.
 			}
 		}
@@ -423,7 +440,7 @@ private:
 	}
 	
 public:
-	Game()
+	Game() //Constructor
 	{
 		player = new Player(0, 0); //Add player.
 		player->AddSpell(new Spell(String("spark"), String("Shoots out a short-ranged spark of energy."), 5, 0)); //Starter attack.
@@ -440,7 +457,7 @@ public:
 			}
 		}*/
 	}
-	~Game()
+	~Game() //Destructor
 	{
 		//Delete rooms.
 		loop(i, 0, map_size)
@@ -457,7 +474,7 @@ public:
 		delete player;
 		player = nullptr;
 	}
-	void Run()
+	void Run() //Where the magic happens.
 	{
 		String input;
 		do

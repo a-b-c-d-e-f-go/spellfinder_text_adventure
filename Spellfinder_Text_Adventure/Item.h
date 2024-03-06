@@ -51,6 +51,10 @@ public:
 			_output += String(" health.");
 		}
 	}
+	virtual usi UniqueEffect() //When used.
+	{
+		return 0;
+	}
 	virtual String Shorthand() const //When drawing the map.
 	{
 		return String("ITM");
@@ -60,6 +64,11 @@ public:
 class Spear : public Item
 {
 public:
+	void Use(String& _output) override //When used.
+	{
+		_output = String("You attack with the spear.");
+		Item::Use(_output);
+	}
 	String Name() const override //For sorting & finding.
 	{
 		return String("spear");
@@ -70,7 +79,7 @@ public:
 	}
 	String RoomDescription() const override //When found in a room.
 	{
-		return String("The crumbled statue's spear is lying on the ground. Obtained the SPEAR.");
+		return String("The crumbled statue's spear is lying on the ground. Obtained the spear.");
 	}
 	int Damage() override //Begginer weapon, but better than spark.
 	{
@@ -84,6 +93,11 @@ public:
 class Glowfruit : public Item
 {
 public:
+	void Use(String& _output) override //When used.
+	{
+		_output = String("You consume the glowfruit.");
+		Item::Use(_output);
+	}
 	bool Consumable() const override //Consumed on use.
 	{
 		return true;
@@ -98,7 +112,7 @@ public:
 	}
 	String RoomDescription() const override //When found in a room.
 	{
-		return String("There's something hanging from one of the plants. Obtained the GLOWFRUIT.");
+		return String("There's something hanging from one of the plants. Obtained the glowfruit.");
 	}
 	int Self_Damage() override //Item gives a full heal. You'll need it.
 	{
@@ -112,6 +126,11 @@ public:
 class Bomb : public Item
 {
 public:
+	void Use(String& _output) override //When used.
+	{
+		_output = String("You detonate the bomb.");
+		Item::Use(_output);
+	}
 	bool Consumable() const override //Consumed on use.
 	{
 		return true;
@@ -126,7 +145,7 @@ public:
 	}
 	String RoomDescription() const override //When found in a room.
 	{
-		return String("Obtained the BOMB.");
+		return String("An explosive device sits near the wall. Obtained the bomb.");
 	}
 	int Damage() override //High damage.
 	{
@@ -150,6 +169,16 @@ private:
 	int damage = 0;
 	int self_damage = 0;
 public:
+	void Use(String& _output) override //When used.
+	{
+		_output = String("You cast ").Append(name).Append(String("."));
+		Item::Use(_output);
+	}
+	usi UniqueEffect() override //When used.
+	{
+		if (Name() == String("vortex")) { return 1; } //Summons a revenant at 1,3.
+		return 0;
+	}
 	int Damage() override //Damage to anything else in the room.
 	{
 		return damage;
@@ -188,6 +217,15 @@ class Scroll : public Item
 {
 public:
 	Spell* spell = nullptr;
+	void Use(String& _output) override //When used.
+	{
+		_output = String("You transcribe the ").Append(spell->Name()).Append(String(" scroll to your spellbook."));
+		Item::Use(_output);
+	}
+	usi UniqueEffect() override //When used.
+	{
+		return 2; //Obtains spell.
+	}
 	bool Consumable() const override //Consumed on use.
 	{
 		return true;
@@ -201,17 +239,17 @@ public:
 	}
 	String Description() const override //When inspected.
 	{
-		String s = String("Parchment with enigmatic symbols written all over.\nIt will take time to copy this over to your spellbook.\n\nUSE:\nAdds the spell '");
+		String s = String("Parchment with enigmatic symbols written all over.\nIt will take time to copy this over to your spellbook,\nand doing so may bring more revenants.\n\nUSE:\nAdds the spell '");
 		s.Append(spell->Name()).Append("' to your spellbook.\n");
 		return s;
 	}
 	String RoomDescription() const override //When found in a room.
 	{
 		String s = Name();
-		s.ToUpper();
+		s.ToLower();
 		s.Prepend(String("Obtained the "));
 		s.Append(".");
-		return s; //Eg. Obtained the SPARK SCROLL.
+		return s; //Eg. Obtained the spark scroll.
 	}
 	Scroll()
 	{
