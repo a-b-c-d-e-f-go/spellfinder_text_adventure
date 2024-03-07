@@ -30,7 +30,7 @@ private:
 	short int gamestate = 0; //0 for mid-game, -1 for failure, 1 for success.
 	const void wait_for_enter() const
 	{
-		cout << "\nPress enter to return.\n"; getchar(); String().ReadFromConsole(); //Wait for enter key.
+		cout << "\nPress enter to return.\n"; String().ReadFromConsole(); //Wait for enter key.
 	}
 	Room rooms[map_size][map_size] = { //Create room array.
 		{
@@ -602,7 +602,7 @@ public:
 	{
 		cout << "#################\n## SPELLFINDER ##\n#################\n\n";
 		cout << "As you enter the dungeon, you look back.\nBehind you, where the entrance used to be, is a solid wall.\nThere has to be a way out somehow.\nPress enter to begin...\n";
-		getchar(); String().ReadFromConsole(); //Wait for enter key.
+		String().ReadFromConsole(); //Wait for enter key.
 		String input;
 		do
 		{
