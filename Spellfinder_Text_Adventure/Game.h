@@ -30,7 +30,7 @@ private:
 	short int gamestate = 0; //0 for mid-game, -1 for failure, 1 for success.
 	const void wait_for_enter() const
 	{
-		cout << "\nPress enter to return.\n"; getchar(); //Wait for enter key.
+		cout << "\nPress enter to return.\n"; getchar(); String().ReadFromConsole(); //Wait for enter key.
 	}
 	Room rooms[map_size][map_size] = { //Create room array.
 		{
@@ -560,6 +560,10 @@ private:
 			cout << "cast <known spell> - Casts a given spell, which typically deals damage.\nThis will end your turn, allowing the revenants to act.\nUse 'spell' for more detail on a specific spell's effects.\n\n";
 			wait_for_enter();
 		}
+		ef(input == String("")) //Empty input
+		{
+			output = prompt;
+		}
 		else
 		{
 			output = String("Command does not exist. Enter 'help' to see a list of commands.");
@@ -597,7 +601,8 @@ public:
 	void Run() //Where the magic happens.
 	{
 		cout << "#################\n## SPELLFINDER ##\n#################\n\n";
-		cout << "As you enter the dungeon, you look back.\nBehind you, where the entrance used to be, is a solid wall.\nThere has to be a way out somehow.\nPress enter to begin...\n"; getchar();
+		cout << "As you enter the dungeon, you look back.\nBehind you, where the entrance used to be, is a solid wall.\nThere has to be a way out somehow.\nPress enter to begin...\n";
+		getchar(); String().ReadFromConsole(); //Wait for enter key.
 		String input;
 		do
 		{
